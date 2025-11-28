@@ -54,7 +54,12 @@ lb config \
 
 # Package selection: core desktop/tooling and meta-packages
 mkdir -p config/package-lists
-cp -f "${REPO_ROOT}/config/package-lists/core.list.chroot" config/package-lists/core.list.chroot
+# Avoid copying the same file onto itself (CI reported identical source/dest paths)
+CORE_SRC="${REPO_ROOT}/config/package-lists/core.list.chroot"
+CORE_DST="config/package-lists/core.list.chroot"
+if [ "$(readlink -f "${CORE_SRC}")" != "$(readlink -f "${CORE_DST}")" ]; then
+  cp -f "${CORE_SRC}" "${CORE_DST}"
+fi
 cat > config/package-lists/my.list.chroot <<'EOF_LIST'
 kali-grapheneos-core kali-grapheneos-web-tools sway
 EOF_LIST
