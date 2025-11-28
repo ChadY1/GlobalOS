@@ -7,8 +7,41 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${REPO_ROOT}"
 
-if ! command -v lb >/dev/null 2>&1; then
-  echo "[!] live-build (lb) is required but not found in PATH" >&2
+require_tool() {
+  local cmd="$1"
+  local pkg="$2"
+
+  if ! command -v "${cmd}" >/dev/null 2>&1; then
+    echo "[!] '${cmd}' is required but not found in PATH." >&2
+    echo "    Install it with: sudo apt install ${pkg}" >&2
+    exit 1
+  fi
+}
+
+require_tool lb live-build
+require_tool bwrap bubblewrap
+require_tool xdg-dbus-proxy xdg-dbus-proxy
+require_tool newuidmap uidmap
+
+USERNS_TOGGLE="/proc/sys/kernel/unprivileged_userns_clone"
+if [ -r "${USERNS_TOGGLE}" ]; then
+  USERNS_VALUE="$(cat "${USERNS_TOGGLE}")"
+
+  if [ "${USERNS_VALUE}" != "1" ]; then
+    echo "[!] Unprivileged user namespaces are disabled (kernel.unprivileged_userns_clone=${USERNS_VALUE})." >&2
+
+    if [ "${EUID}" -eq 0 ]; then
+      echo "    Enabling temporarily for this session via sysctl..." >&2
+      sysctl -w kernel.unprivileged_userns_clone=1 >/dev/null
+    else
+      echo "    Re-run this script as root or enable it manually:" >&2
+      echo "      sudo sysctl -w kernel.unprivileged_userns_clone=1" >&2
+      exit 1
+    fi
+  fi
+else
+  echo "[!] ${USERNS_TOGGLE} is missing; ensure your kernel supports unprivileged user namespaces." >&2
+  echo "    See: https://www.kernel.org/doc/Documentation/admin-guide/sysctl/kernel.txt" >&2
   exit 1
 fi
 
