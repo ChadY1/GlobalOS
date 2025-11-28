@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# This script bootstraps a Kali-GrapheneOS live-build workspace.
+# This script bootstraps a Global-K-OS live-build workspace.
 # It expects to be executed on a Debian host with the live-build tooling installed.
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -47,9 +47,9 @@ lb config \
   --bootloader grub \
   --debian-installer-gui true \
   --linux-packages "linux-image-amd64 linux-headers-amd64" \
-  --iso-application "Kali-GrapheneOS" \
-  --iso-publisher "YourName" \
-  --iso-volume "Kali-GOS-2025.1"
+  --iso-application "Global-K-OS" \
+  --iso-publisher "GlobalOS" \
+  --iso-volume "Global-K-OS-1.0"
 
 # Package selection: core desktop/tooling and meta-packages
 mkdir -p config/package-lists
@@ -82,4 +82,24 @@ cp -f "${REPO_ROOT}/config/hooks/live/001-permissions.chroot" config/hooks/live/
 # Build the ISO
 lb build
 
-echo "[+] ISO created at $(pwd)/kali-grapheneos-live-amd64.hybrid.iso"
+shopt -s nullglob
+ISO_CANDIDATES=("" ./*.hybrid.iso ./*.iso)
+if [ ${#ISO_CANDIDATES[@]} -gt 1 ]; then
+  ISO_PATH="${ISO_CANDIDATES[1]}"
+else
+  ISO_PATH=""
+fi
+
+if [ -z "${ISO_PATH}" ]; then
+  echo "[!] Unable to locate built ISO (expected *.hybrid.iso or *.iso in $(pwd))." >&2
+  exit 1
+fi
+
+echo "[+] ISO created at ${ISO_PATH}"
+if command -v sha256sum >/dev/null 2>&1; then
+  echo "[+] Computing SHA-256 checksum..."
+  sha256sum "${ISO_PATH}" | tee "${ISO_PATH}.sha256"
+  echo "[+] SHA-256 saved to ${ISO_PATH}.sha256"
+else
+  echo "[!] sha256sum not available; cannot emit ISO hash." >&2
+fi

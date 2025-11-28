@@ -1,9 +1,9 @@
-# Minimal Sway config for Kali-GrapheneOS live images
+# Minimal Sway config for Global-K-OS live images
 
-# Appearance (Nord palette)
-client.focused          #4c566a #4c566a #eceff4 #4c566a #4c566a
-client.focused_inactive #3b4252 #3b4252 #d8dee9 #3b4252 #3b4252
-client.unfocused        #2e3440 #2e3440 #d8dee9 #2e3440 #2e3440
+# Appearance (Globaleurope.fr/home inspired blues)
+client.focused          #0a2a5a #0a2a5a #e6eef7 #0a2a5a #0a2a5a
+client.focused_inactive #123366 #123366 #c7d7ee #123366 #123366
+client.unfocused        #091a39 #091a39 #c7d7ee #091a39 #091a39
 
 set $mod Mod4
 
