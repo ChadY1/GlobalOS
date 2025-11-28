@@ -1,0 +1,17 @@
+# Core desktop and sandboxing components
+sway
+foot
+wofi
+mako-notifier
+# Sandboxing/runtime isolation
+bubblewrap
+xdg-dbus-proxy
+uidmap
+# Networking basics and tooling
+network-manager
+curl
+iproute2
+net-tools
+# Quality-of-life
+sudo
+ca-certificates
