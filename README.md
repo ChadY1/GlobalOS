@@ -84,30 +84,12 @@ Cette feuille de route décrit comment créer une distribution de bureau qui com
 - Désactiver les services de télémétrie, limiter le démarrage automatique, et préférer des notifications minimales via `mako`.
 
 ## Phase 5 : génération d’ISO avec live-build
-Script `build.sh` minimal dans un répertoire de build :
+Un script prêt à l’emploi est fourni dans `scripts/build.sh`. Il prépare l’arborescence `live-build`, copie le profil Sway de l’utilisateur (s’il existe) et injecte le lanceur sandbox Firefox :
 ```bash
-#!/bin/bash
-set -e
-
-lb clean
-lb config \
-  --distribution testing \
-  --archive-areas "main contrib non-free non-free-firmware" \
-  --debian-installer live \
-  --bootloader grub \
-  --debian-installer-gui true \
-  --linux-packages "linux-image-amd64 linux-headers-amd64" \
-  --iso-application "Kali-GrapheneOS" \
-  --iso-publisher "YourName" \
-  --iso-volume "Kali-GOS-2025.1"
-
-echo "kali-grapheneos-core kali-grapheneos-web-tools sway" >> config/package-lists/my.list.chroot
-mkdir -p config/includes.chroot/etc/skel/.config/sway/
-cp ~/.config/sway/config config/includes.chroot/etc/skel/.config/sway/
-cp firefox-sandbox.sh config/includes.chroot/usr/local/bin/
-
-lb build
+chmod +x scripts/build.sh
+./scripts/build.sh
 ```
+Prérequis côté hôte : Debian *testing/sid*, le paquet `live-build` et un accès root pour la création de l’image ISO.
 
 ## Stratégie d’itération
 1. **Prototype** : installer Debian *testing*, compiler le noyau durci, configurer Sway + un profil `bubblewrap` (Firefox) et vérifier la surface d’attaque (audit `seccomp`, `lsm`).
