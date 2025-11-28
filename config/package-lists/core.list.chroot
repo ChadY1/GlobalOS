@@ -1,0 +1,8 @@
+# Core Wayland environment and sandboxing utilities for the live image
+sway
+foot
+wofi
+mako
+bubblewrap
+xdg-dbus-proxy
+xdg-desktop-portal-wlr
