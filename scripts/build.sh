@@ -17,7 +17,8 @@ require_cmd() {
 }
 
 require_cmd lb live-build
-require_cmd bubblewrap bubblewrap
+# bubblewrap installs the `bwrap` binary
+require_cmd bwrap bubblewrap
 require_cmd xdg-dbus-proxy xdg-dbus-proxy
 require_cmd newuidmap uidmap
 
