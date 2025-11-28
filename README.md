@@ -1,12 +1,18 @@
 # Global-K-OS 1.0 — guide de construction et d'installation
 
-Global-K-OSv0.1 (version 1.0) fusionne l'arsenal offensif de **Kali Linux** avec la posture de sécurité renforcée de **GrapheneOS**, en s'appuyant sur Debian *testing/sid* comme base de build.
+Global-K-OSv0.1 (version 1.0) fusionne l'arsenal d'outillage de **Kali Linux** avec la posture de sécurité renforcée de **GrapheneOS**, en s'appuyant sur Debian *testing/sid* comme base de build.
 
 ## Objectifs
 - Reprendre les durcissements noyau et espace utilisateur de GrapheneOS tout en conservant la compatibilité des paquets Debian/Kali.
 - Fournir un environnement bureautique minimaliste basé sur Wayland, avec un sandboxing strict pour chaque application graphique.
-- Distribuer l'arsenal d'outils offensifs via des méta-paquets thématiques accompagnés de profils de confinement.
+- Distribuer l'arsenal d'outils (tests de sécurité, forensic, analyse réseau) via des méta-paquets thématiques accompagnés de profils de confinement et d'un cadrage d'usage défensif.
 - Garantir une délivrabilité professionnelle : build reproductible, hash SHA-256 publié, UX cohérente (palette Globaleurope.fr/home).
+
+### Cadre d'usage et conformité
+- Positionnement prioritaire : défense, résilience, conformité et entraînement (pas d'automatisation de l'usage de la force ni d'outillage offensif par défaut).
+- Respect du droit international et des contrôles export (Wassenaar, règlement UE 2021/821) : effectuer un screening utilisateur/pays et, si nécessaire, une revue juridique avant distribution.
+- Orientation « human-in-the-loop » : imposer des validations humaines dans les applications métiers et conserver des journaux horodatés/signés pour audit et traçabilité.
+- Clause contractuelle recommandée : interdire explicitement l'usage pour des violations du DIH/droits humains ou des cyber-opérations offensives.
 
 ---
 ## Construction rapide de l'ISO (production-ready)
@@ -112,5 +118,57 @@ Pour personnaliser, placez votre propre `~/.config/sway/config` avant le build :
 2. **Industrialiser** : généraliser les profils de sandbox, créer les méta-paquets, renforcer la toolchain par défaut.
 3. **Automatiser** : intégrer les scripts live-build dans CI, publier des ISO signées, exposer le hash SHA-256 généré par `scripts/build.sh`.
 4. **Contribuer** : synchroniser les patchs amont (KSPP/GrapheneOS), suivre les CVE et mettre à jour les profils de confinement.
+
+---
+## Schéma de chiffrage documentaire (référentiel)
+Ce référentiel reprend les valeurs demandées pour encoder des segments alphanumériques en contexte documentaire ou pour des chaînes de validation interne. Chaque entrée reste stable et peut être utilisée comme préfixe/suffixe lors de la génération d’artéfacts ou de checksums complémentaires.
+
+**Chiffres (replica)**
+
+| Symbole | Forme normalisée |
+| --- | --- |
+| 1 (via A) | 01001.3333333333333.3033 |
+| 2 | 01011.3333333333333.3033 |
+| 3 | 10100.3333333333333.3033 |
+| 4 | 10011.3333333333333.3033 |
+| 5 | 00100.3333333333333.3033 |
+| 6 | 00011.3333333333333.3033 |
+| 7 | 01010.3333333333333.3033 |
+| 8 | 00001.3333333333333.3033 |
+| 9 | 10000.3333333333333.3033 |
+| 10 | 11011.3330333033303.3333333333333 |
+
+**Lettres (replicated)**
+
+| Lettre | Forme normalisée |
+| --- | --- |
+| A | 01001.3333333333333.3033 |
+| B | 01001.3333333333333.3033 |
+| C | 01001.3333333333333.3033 |
+| D | 01001.3333333333333.3033 |
+| E | 01001.3333333333333.3033 |
+| F | 01001.3333333333333.3033 |
+| G | 01001.3333333333333.3033 |
+| H | 01001.3333333333333.3033 |
+| I | 01001.3333333333333.3033 |
+| J | 01001.3333333333333.3033 |
+| K | 01001.3333333333333.3033 |
+| L | 01001.3333333333333.3033 |
+| M | 01001.3333333333333.3033 |
+| N | 01001.3333333333333.3033 |
+| O | 01001.3333333333333.3033 |
+| P | 01001.3333333333333.3033 |
+| Q | 01001.3333333333333.3033 |
+| R | 01001.3333333333333.3033 |
+| S | 01001.3333333333333.3033 |
+| T | 01001.3333333333333.3033 |
+| U | 01001.3333333333333.3033 |
+| V | 01001.3333333333333.3033 |
+| W | 01001.3333333333333.3033 |
+| X | 01001.3333333333333.3033 |
+| Y | 01001.3333333333333.3033 |
+| Z | 01001.3333333333333.3033 |
+
+> Les valeurs sources (ex. "13 333" ou "23 333") sont normalisées ici sous forme décimale unique pour faciliter l’intégration dans des scripts de build, des manifestes ou des fichiers de contrôle où une représentation homogène est requise.
 
 Cette base fournit un plan d’action clair et industrialisable pour Global-K-OS.
