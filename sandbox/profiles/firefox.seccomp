@@ -1,0 +1,34 @@
+# Seccomp-bpf policy for Firefox bubblewrap sandboxing.
+#
+# Format matches the libseccomp-bpf policy language used by the
+# `seccomp-bpf` helper (part of libseccomp). The filter intentionally
+# allows common desktop/syscall usage while blocking namespace creation
+# and known-kernel-attack primitives that the sandbox should never use.
+
+@default allow
+
+# Keep the sandbox from creating additional namespaces or ptrace hooks.
+clone: errno 1
+clone3: errno 1
+unshare: errno 1
+setns: errno 1
+ptrace: errno 1
+
+# Deny loading arbitrary BPF or userfaultfd setups.
+bpf: errno 1
+userfaultfd: errno 1
+
+# Disallow keyring manipulation inside the sandbox.
+add_key: errno 1
+keyctl: errno 1
+
+# Avoid raw kernel modules or perf events from the container.
+init_module: errno 1
+finit_module: errno 1
+delete_module: errno 1
+perf_event_open: errno 1
+
+# Prevent kexec or reboot triggers.
+kexec_file_load: errno 1
+kexec_load: errno 1
+reboot: errno 1
