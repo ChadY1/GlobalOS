@@ -15,26 +15,39 @@ Global-K-OSv0.1 (version 1.0) fusionne l'arsenal d'outillage de **Kali Linux** a
 - Clause contractuelle recommandée : interdire explicitement l'usage pour des violations du DIH/droits humains ou des cyber-opérations offensives.
 
 ---
-## Construction rapide de l'ISO (production-ready)
+## Construction et installation premium (production-ready)
 
-### Prérequis hôte
-- Debian *testing/sid*
-- Paquets : `live-build`, `bubblewrap`, `xdg-dbus-proxy`, `uidmap`, `sha256sum`
-- User namespaces activés : `kernel.unprivileged_userns_clone=1`
-  - Temporaire : `sudo sysctl -w kernel.unprivileged_userns_clone=1`
-  - Persistant : `echo 'kernel.unprivileged_userns_clone=1' | sudo tee /etc/sysctl.d/99-userns.conf`
+### Checklist express
+1) **Hôte** : Debian *testing/sid* à jour (`sudo apt update && sudo apt full-upgrade`).
+2) **Paquets** : `sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap sha256sum qemu-utils`.
+3) **User namespaces** : `sudo sysctl -w kernel.unprivileged_userns_clone=1` (et persistance via `/etc/sysctl.d/99-userns.conf`).
+4) **Palette Sway** : garder `sway/config` ou déposer votre `~/.config/sway/config` pour un thème custom qui sera inclus.
+5) **Build** : exécuter `./scripts/build.sh` depuis la racine du dépôt.
+6) **Intégrité** : vérifier le hash généré (`sha256sum -c *.sha256`).
+7) **Validation** : booter l'ISO en VM UEFI puis sur matériel, avec autologin + Sway auto-start pour confirmer l'expérience utilisateur.
 
-### Étapes
+### Étapes détaillées
 ```bash
-# 1) Préparer le script
-chmod +x scripts/build.sh
+# 1) Préparer
+sudo apt update && sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap sha256sum qemu-utils
+echo 'kernel.unprivileged_userns_clone=1' | sudo tee /etc/sysctl.d/99-userns.conf
+sudo sysctl -p /etc/sysctl.d/99-userns.conf
 
 # 2) Lancer la construction depuis la racine du dépôt
+chmod +x scripts/build.sh
 ./scripts/build.sh
 
-# 3) Récupérer l'ISO et son hash
+# 3) Récupérer l'ISO et son hash (générés automatiquement)
 ls -1 *.iso *.hybrid.iso *.sha256
+
+# 4) Vérifier l'intégrité
+sha256sum -c *.sha256
 ```
+
+### Build CI GitHub (artifact ISO automatique)
+- Chaque **pull request** lance le workflow GitHub Actions **Build ISO artifact** qui exécute `scripts/build.sh` sur un runner Ubuntu avec les dépendances requises.
+- À la fin du run, l'ISO et son hash `.sha256` sont publiés comme artifact nommé `global-k-os-iso`.
+- Pour récupérer l'image : onglet **Actions** → run **Build ISO artifact** correspondant à la PR → section **Artifacts** → télécharger `global-k-os-iso`.
 
 Le script :
 - Nettoie un éventuel build précédent (`lb clean`).
@@ -44,15 +57,35 @@ Le script :
 - Place les drop-ins système pour autologin sur `tty1` et démarrage automatique de **Sway** pour l'utilisateur live.
 - Construit l'ISO puis génère automatiquement un hash **SHA-256** (`<iso>.sha256`) pour vérification en ligne ou en CI.
 
-### Vérifier le hash
-```bash
-sha256sum -c *.sha256
-```
-Le checksum doit correspondre exactement au fichier `.sha256` généré. Publiez ce hash avec l'ISO pour une validation côté utilisateurs ou pipeline CI/CD.
+### Tester l'ISO (UX premium)
+- **VM UEFI (recommandé avant toute diffusion)** :
+  ```bash
+  qemu-img create -f qcow2 /tmp/gkos.qcow2 20G
+  qemu-system-x86_64 \
+    -enable-kvm -m 4096 -smp 4 \
+    -cpu host \
+    -machine q35,accel=kvm \
+    -bios /usr/share/OVMF/OVMF_CODE.fd \
+    -drive if=virtio,file=/tmp/gkos.qcow2 \
+    -cdrom Global-K-OS*.iso
+  ```
+- **Bare metal** : graver l'ISO sur USB puis booter en UEFI. Exemple avec `dd` (vérifiez la cible !) :
+  ```bash
+  sudo dd if=Global-K-OS*.iso of=/dev/sdX bs=4M status=progress oflag=sync
+  ```
+  Si Secure Boot bloque le démarrage, désactivez-le temporairement ou signez l'ISO avec vos clés internes.
 
-### Tester l'ISO
-- **VM** : booter l'ISO avec UEFI activé (ex. QEMU/virt-manager, VirtualBox, VMware).
-- **Bare metal** : clé USB gravée via `dd` ou `balenaEtcher` avec Secure Boot désactivé si nécessaire.
+### Installation sur disque depuis l'ISO
+L'ISO inclut l'installeur Debian (mode graphique). Pour une installation « production-ready » :
+- Choisissez le partitionnement guidé LUKS2 (chiffrement complet) et ext4.
+- Montez `/tmp` et `/var/tmp` en `noexec,nodev,nosuid`, `/home` et `/var` en `nodev` (voir options dans l'installeur expert).
+- Conservez l'utilisateur live uniquement pour la session éphémère ; créez un compte dédié avec clé SSH et mot de passe robuste.
+
+### Contrôles finaux avant diffusion
+- **Hash** : le `.sha256` doit correspondre byte pour byte à l'ISO publiée.
+- **UX** : l'autologin doit lancer Sway immédiatement (palette Globaleurope.fr/home), `Super+Enter` et `Super+d` doivent fonctionner.
+- **Réseau** : `NetworkManager` opérationnel, `pipewire` audio OK, sandbox Firefox exécutable (`/usr/local/bin/firefox-sandbox.sh`).
+- **Confinement** : vérifier `bubblewrap` et `xdg-dbus-proxy` présents via `which` dans la session live.
 
 ---
 ## Interface utilisateur (palette Globaleurope.fr/home)
