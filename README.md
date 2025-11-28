@@ -89,7 +89,11 @@ Un script prêt à l’emploi est fourni dans `scripts/build.sh`. Il prépare l�
 chmod +x scripts/build.sh
 ./scripts/build.sh
 ```
-Prérequis côté hôte : Debian *testing/sid*, le paquet `live-build` et un accès root pour la création de l’image ISO.
+Prérequis côté hôte : Debian *testing/sid*, les paquets `live-build`, `bubblewrap`, `xdg-dbus-proxy`, `uidmap`, et un accès root pour la création de l’image ISO. Assurez-vous également que les namespaces utilisateurs non privilégiés sont activés avant la construction :
+```bash
+sudo sysctl -w kernel.unprivileged_userns_clone=1
+```
+Si le paramètre `/proc/sys/kernel/unprivileged_userns_clone` est absent ou reste désactivé, activez-le dans le noyau ou consultez la documentation du kernel pour les alternatives.
 
 ## Stratégie d’itération
 1. **Prototype** : installer Debian *testing*, compiler le noyau durci, configurer Sway + un profil `bubblewrap` (Firefox) et vérifier la surface d’attaque (audit `seccomp`, `lsm`).
