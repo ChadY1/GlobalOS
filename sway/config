@@ -1,0 +1,20 @@
+# Minimal Sway config for Global-K-OS live images
+
+# Appearance (Globaleurope.fr/home inspired blues)
+client.focused          #0a2a5a #0a2a5a #e6eef7 #0a2a5a #0a2a5a
+client.focused_inactive #123366 #123366 #c7d7ee #123366 #123366
+client.unfocused        #091a39 #091a39 #c7d7ee #091a39 #091a39
+
+set $mod Mod4
+
+# Launch a terminal
+bindsym $mod+Return exec foot
+# Launch application launcher
+bindsym $mod+d exec wofi --show drun
+
+# Basic workspace navigation
+bindsym $mod+Left workspace prev
+bindsym $mod+Right workspace next
+
+# Reload config
+bindsym $mod+Shift+c reload
