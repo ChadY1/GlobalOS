@@ -83,7 +83,11 @@ chmod 0755 config/includes.chroot/usr/local/bin/firefox-sandbox.sh
 
 # Hooks and shared assets
 mkdir -p config/hooks/live
-cp -f "${REPO_ROOT}/config/hooks/live/001-permissions.chroot" config/hooks/live/
+HOOK_SRC="${REPO_ROOT}/config/hooks/live/001-permissions.chroot"
+HOOK_DST="config/hooks/live/001-permissions.chroot"
+if [ "$(readlink -f "${HOOK_SRC}")" != "$(readlink -f "${HOOK_DST}")" ]; then
+  cp -f "${HOOK_SRC}" "${HOOK_DST}"
+fi
 
 # Build the ISO
 lb build
