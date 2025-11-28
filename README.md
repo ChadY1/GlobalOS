@@ -49,7 +49,6 @@ Cette feuille de route décrit comment créer une distribution de bureau qui com
     --new-session \
     firefox "$@"
   ```
-- Dépendances recommandées pour les bwrap wrappers : `bubblewrap`, `xdg-dbus-proxy`, `libseccomp` et l’outil `seccomp-bpf` pour compiler les filtres.
 - Étendre avec des profils *seccomp-bpf* et `xdg-dbus-proxy` pour limiter D-Bus ; isoler chaque profil dans `/etc/bubblewrap.d/<app>.conf`.
 
 ## Phase 3 : méta-paquets Kali + confinement
@@ -85,18 +84,24 @@ Cette feuille de route décrit comment créer une distribution de bureau qui com
 - Désactiver les services de télémétrie, limiter le démarrage automatique, et préférer des notifications minimales via `mako`.
 
 ## Phase 5 : génération d’ISO avec live-build
-Un script prêt à l’emploi est fourni dans `scripts/build.sh`. Il prépare l’arborescence `live-build`, copie le profil Sway de l’utilisateur (s’il existe) ou utilise le modèle par défaut du dépôt (`sway/config`), puis injecte le lanceur sandbox Firefox. Le socle graphique et de confinement est défini dans `config/package-lists/core.list.chroot` (Sway, foot, wofi, bubblewrap, etc.) et un hook `config/hooks/live/001-permissions.chroot` garde les lanceurs sandbox exécutables tout en répliquant la configuration Sway de `/etc/skel` vers les comptes du live :
+Un script prêt à l’emploi est fourni dans `scripts/build.sh`. Il prépare l’arborescence `live-build`, copie le profil Sway de l’utilisateur (s’il existe) ou utilise le modèle par défaut du dépôt (`sway/config`), puis injecte le lanceur sandbox Firefox.
+
+Prérequis côté hôte :
+- Debian *testing/sid*
+- Paquets : `live-build`, `bubblewrap`, `xdg-dbus-proxy`, `uidmap`
+- Noyau avec `kernel.unprivileged_userns_clone=1` (user namespaces activés) ; ajustable via `sudo sysctl -w kernel.unprivileged_userns_clone=1`
+
+Le script vérifie ces dépendances et refuse de construire si l’environnement n’est pas prêt.
+
+Packages et hooks par défaut injectés dans l’ISO :
+- `config/package-lists/core.list.chroot` : Wayland minimal (Sway, foot, wofi, mako) + outils réseau de base + sandboxing (`bubblewrap`, `xdg-dbus-proxy`, `uidmap`).
+- `config/hooks/live/001-permissions.chroot` : remet les permissions d’exécution du lanceur `firefox-sandbox.sh` et garantit un squelette Sway présent pour les nouveaux comptes.
+
+Construction :
 ```bash
 chmod +x scripts/build.sh
 ./scripts/build.sh
 ```
-Prérequis côté hôte : Debian *testing/sid*, les paquets `live-build`, `bubblewrap`, `xdg-dbus-proxy`, `uidmap`, et un accès root pour la création de l’image ISO. Assurez-vous également que les namespaces utilisateurs non privilégiés sont activés avant la construction :
-```bash
-sudo sysctl -w kernel.unprivileged_userns_clone=1
-```
-Si le paramètre `/proc/sys/kernel/unprivileged_userns_clone` est absent ou reste désactivé, activez-le dans le noyau ou consultez la documentation du kernel pour les alternatives.
-
-Pour étendre l’image, ajoutez vos paquets dans de nouveaux fichiers `config/package-lists/*.list.chroot` (ou complétez `core.list.chroot`), placez vos fichiers de configuration dans `config/includes.chroot/`, et créez des hooks supplémentaires sous `config/hooks/live/` pour automatiser les permissions ou post-installations.
 
 ## Stratégie d’itération
 1. **Prototype** : installer Debian *testing*, compiler le noyau durci, configurer Sway + un profil `bubblewrap` (Firefox) et vérifier la surface d’attaque (audit `seccomp`, `lsm`).

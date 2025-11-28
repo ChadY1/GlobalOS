@@ -1,24 +1,17 @@
 #!/bin/sh
-set -eu
+set -e
 
-# Ensure sandbox launchers shipped in /usr/local/bin remain executable
-if [ -d /usr/local/bin ]; then
-  find /usr/local/bin -maxdepth 1 -type f \
-    \( -name '*-sandbox' -o -name '*-sandbox.sh' \) \
-    -exec chmod 0755 {} +
+# Ensure sandbox launchers are executable
+if [ -x /usr/local/bin/firefox-sandbox.sh ]; then
+  chmod 0755 /usr/local/bin/firefox-sandbox.sh
 fi
 
-# Propagate the default Sway configuration to any user homes missing it
-SKEL_SWAY="/etc/skel/.config/sway"
-if [ -d "$SKEL_SWAY" ]; then
-  for home in /home/*; do
-    [ -d "$home" ] || continue
-    target="$home/.config/sway"
-
-    if [ ! -d "$target" ]; then
-      mkdir -p "$target"
-      cp -a "$SKEL_SWAY/." "$target/"
-      chown -R "$(stat -c '%u:%g' "$home")" "$target"
-    fi
-  done
+# Guarantee skeleton Sway config is present for new users
+if [ -f /etc/skel/.config/sway/config ]; then
+  chmod 0644 /etc/skel/.config/sway/config
+else
+  mkdir -p /etc/skel/.config/sway
+  if [ -f /usr/local/share/kali-grapheneos/sway/config ]; then
+    cp /usr/local/share/kali-grapheneos/sway/config /etc/skel/.config/sway/config
+  fi
 fi

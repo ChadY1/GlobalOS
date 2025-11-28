@@ -7,41 +7,32 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${REPO_ROOT}"
 
-require_tool() {
+require_cmd() {
   local cmd="$1"
-  local pkg="$2"
-
+  local pkg_hint="$2"
   if ! command -v "${cmd}" >/dev/null 2>&1; then
-    echo "[!] '${cmd}' is required but not found in PATH." >&2
-    echo "    Install it with: sudo apt install ${pkg}" >&2
+    echo "[!] Missing required command: ${cmd} (install package: ${pkg_hint})" >&2
     exit 1
   fi
 }
 
-require_tool lb live-build
-require_tool bwrap bubblewrap
-require_tool xdg-dbus-proxy xdg-dbus-proxy
-require_tool newuidmap uidmap
+require_cmd lb live-build
+require_cmd bubblewrap bubblewrap
+require_cmd xdg-dbus-proxy xdg-dbus-proxy
+require_cmd newuidmap uidmap
 
-USERNS_TOGGLE="/proc/sys/kernel/unprivileged_userns_clone"
-if [ -r "${USERNS_TOGGLE}" ]; then
-  USERNS_VALUE="$(cat "${USERNS_TOGGLE}")"
-
+USERNS_SYSCTL="/proc/sys/kernel/unprivileged_userns_clone"
+if [ -f "${USERNS_SYSCTL}" ]; then
+  USERNS_VALUE="$(cat "${USERNS_SYSCTL}")"
   if [ "${USERNS_VALUE}" != "1" ]; then
-    echo "[!] Unprivileged user namespaces are disabled (kernel.unprivileged_userns_clone=${USERNS_VALUE})." >&2
-
-    if [ "${EUID}" -eq 0 ]; then
-      echo "    Enabling temporarily for this session via sysctl..." >&2
-      sysctl -w kernel.unprivileged_userns_clone=1 >/dev/null
-    else
-      echo "    Re-run this script as root or enable it manually:" >&2
-      echo "      sudo sysctl -w kernel.unprivileged_userns_clone=1" >&2
-      exit 1
-    fi
+    echo "[!] User namespaces are disabled (kernel.unprivileged_userns_clone=${USERNS_VALUE})." >&2
+    echo "    Enable temporarily: sudo sysctl -w kernel.unprivileged_userns_clone=1" >&2
+    echo "    Persist (root): echo 'kernel.unprivileged_userns_clone=1' | sudo tee /etc/sysctl.d/99-userns.conf" >&2
+    exit 1
   fi
 else
-  echo "[!] ${USERNS_TOGGLE} is missing; ensure your kernel supports unprivileged user namespaces." >&2
-  echo "    See: https://www.kernel.org/doc/Documentation/admin-guide/sysctl/kernel.txt" >&2
+  echo "[!] Cannot detect unprivileged user namespace support at ${USERNS_SYSCTL}." >&2
+  echo "    Please ensure user namespaces are enabled before building." >&2
   exit 1
 fi
 
@@ -60,25 +51,33 @@ lb config \
   --iso-publisher "YourName" \
   --iso-volume "Kali-GOS-2025.1"
 
-# Package selection: rely on the repository-maintained lists in config/package-lists
-if [ ! -f config/package-lists/core.list.chroot ]; then
-  echo "[!] config/package-lists/core.list.chroot is missing; populate it with your base desktop and sandbox packages." >&2
-  exit 1
-fi
+# Package selection: core desktop/tooling and meta-packages
+mkdir -p config/package-lists
+cp -f "${REPO_ROOT}/config/package-lists/core.list.chroot" config/package-lists/core.list.chroot
+cat > config/package-lists/my.list.chroot <<'EOF_LIST'
+kali-grapheneos-core kali-grapheneos-web-tools sway
+EOF_LIST
 
 # Include user configuration skeletons
 SWAY_DEST="config/includes.chroot/etc/skel/.config/sway"
-mkdir -p "${SWAY_DEST}"
+SHARED_SWAY="config/includes.chroot/usr/local/share/kali-grapheneos/sway"
+mkdir -p "${SWAY_DEST}" "${SHARED_SWAY}"
 
 if [ -f "${HOME}/.config/sway/config" ]; then
   cp "${HOME}/.config/sway/config" "${SWAY_DEST}/"
+  cp "${HOME}/.config/sway/config" "${SHARED_SWAY}/config"
 else
   cp "${REPO_ROOT}/sway/config" "${SWAY_DEST}/"
+  cp "${REPO_ROOT}/sway/config" "${SHARED_SWAY}/config"
 fi
 
 mkdir -p config/includes.chroot/usr/local/bin
 cp sandbox/firefox-sandbox.sh config/includes.chroot/usr/local/bin/
 chmod 0755 config/includes.chroot/usr/local/bin/firefox-sandbox.sh
+
+# Hooks and shared assets
+mkdir -p config/hooks/live
+cp -f "${REPO_ROOT}/config/hooks/live/001-permissions.chroot" config/hooks/live/
 
 # Build the ISO
 lb build

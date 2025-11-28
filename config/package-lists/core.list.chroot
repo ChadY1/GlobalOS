@@ -1,8 +1,17 @@
-# Core Wayland environment and sandboxing utilities for the live image
+# Core desktop and sandboxing components
 sway
 foot
 wofi
-mako
+mako-notifier
+# Sandboxing/runtime isolation
 bubblewrap
 xdg-dbus-proxy
-xdg-desktop-portal-wlr
+uidmap
+# Networking basics and tooling
+network-manager
+curl
+iproute2
+net-tools
+# Quality-of-life
+sudo
+ca-certificates
