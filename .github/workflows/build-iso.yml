@@ -1,0 +1,58 @@
+name: Build ISO artifact
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            live-build \
+            uidmap \
+            bubblewrap \
+            xdg-dbus-proxy \
+            libseccomp-dev \
+            squashfs-tools \
+            grub-pc-bin \
+            grub-efi-amd64-bin \
+            mtools \
+            dosfstools
+
+      - name: Enable unprivileged user namespaces
+        run: |
+          sudo sysctl -w kernel.unprivileged_userns_clone=1
+
+      - name: Build ISO
+        run: |
+          sudo bash scripts/build.sh
+
+      - name: Collect ISO artifacts
+        run: |
+          ISO_PATH=$(ls -1t ./*.hybrid.iso ./*.iso 2>/dev/null | head -n 1 || true)
+          if [ -z "$ISO_PATH" ]; then
+            echo "ISO artifact not found" >&2
+            exit 1
+          fi
+          echo "ISO_PATH=$ISO_PATH" >> $GITHUB_ENV
+          if [ -f "${ISO_PATH}.sha256" ]; then
+            echo "ISO_SHA256=${ISO_PATH}.sha256" >> $GITHUB_ENV
+          fi
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: global-k-os-iso
+          path: |
+            ${{ env.ISO_PATH }}
+            ${{ env.ISO_SHA256 || '' }}
+          if-no-files-found: error
