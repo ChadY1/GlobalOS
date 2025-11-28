@@ -1,0 +1,20 @@
+# Minimal Sway config for Kali-GrapheneOS live images
+
+# Appearance (Nord palette)
+client.focused          #4c566a #4c566a #eceff4 #4c566a #4c566a
+client.focused_inactive #3b4252 #3b4252 #d8dee9 #3b4252 #3b4252
+client.unfocused        #2e3440 #2e3440 #d8dee9 #2e3440 #2e3440
+
+set $mod Mod4
+
+# Launch a terminal
+bindsym $mod+Return exec foot
+# Launch application launcher
+bindsym $mod+d exec wofi --show drun
+
+# Basic workspace navigation
+bindsym $mod+Left workspace prev
+bindsym $mod+Right workspace next
+
+# Reload config
+bindsym $mod+Shift+c reload

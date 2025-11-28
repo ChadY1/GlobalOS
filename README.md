@@ -84,7 +84,7 @@ Cette feuille de route décrit comment créer une distribution de bureau qui com
 - Désactiver les services de télémétrie, limiter le démarrage automatique, et préférer des notifications minimales via `mako`.
 
 ## Phase 5 : génération d’ISO avec live-build
-Un script prêt à l’emploi est fourni dans `scripts/build.sh`. Il prépare l’arborescence `live-build`, copie le profil Sway de l’utilisateur (s’il existe) et injecte le lanceur sandbox Firefox :
+Un script prêt à l’emploi est fourni dans `scripts/build.sh`. Il prépare l’arborescence `live-build`, copie le profil Sway de l’utilisateur (s’il existe) ou utilise le modèle par défaut du dépôt (`sway/config`), puis injecte le lanceur sandbox Firefox :
 ```bash
 chmod +x scripts/build.sh
 ./scripts/build.sh
