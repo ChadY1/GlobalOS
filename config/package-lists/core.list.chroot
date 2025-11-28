@@ -1,0 +1,35 @@
+# Core desktop and sandboxing components
+sway
+swaybg
+swayidle
+swaylock
+waybar
+foot
+wofi
+mako-notifier
+seatd
+# Sandboxing/runtime isolation
+bubblewrap
+xdg-dbus-proxy
+uidmap
+# Live essentials and session plumbing
+live-boot
+live-config
+systemd-sysv
+dbus-user-session
+policykit-1
+# Graphics and audio stack
+mesa-utils
+mesa-va-drivers
+pipewire
+alsa-utils
+wireplumber
+# Networking basics and tooling
+network-manager
+network-manager-config-connectivity-debian
+curl
+iproute2
+net-tools
+# Quality-of-life
+sudo
+ca-certificates
