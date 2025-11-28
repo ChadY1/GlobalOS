@@ -49,6 +49,7 @@ Cette feuille de route décrit comment créer une distribution de bureau qui com
     --new-session \
     firefox "$@"
   ```
+- Dépendances recommandées pour les bwrap wrappers : `bubblewrap`, `xdg-dbus-proxy`, `libseccomp` et l’outil `seccomp-bpf` pour compiler les filtres.
 - Étendre avec des profils *seccomp-bpf* et `xdg-dbus-proxy` pour limiter D-Bus ; isoler chaque profil dans `/etc/bubblewrap.d/<app>.conf`.
 
 ## Phase 3 : méta-paquets Kali + confinement
