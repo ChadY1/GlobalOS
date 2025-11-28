@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+# Ensure sandbox launchers are executable
+if [ -x /usr/local/bin/firefox-sandbox.sh ]; then
+  chmod 0755 /usr/local/bin/firefox-sandbox.sh
+fi
+
+# Guarantee skeleton Sway config is present for new users
+if [ -f /etc/skel/.config/sway/config ]; then
+  chmod 0644 /etc/skel/.config/sway/config
+else
+  mkdir -p /etc/skel/.config/sway
+  if [ -f /usr/local/share/kali-grapheneos/sway/config ]; then
+    cp /usr/local/share/kali-grapheneos/sway/config /etc/skel/.config/sway/config
+  fi
+fi
