@@ -84,12 +84,14 @@ Cette feuille de route décrit comment créer une distribution de bureau qui com
 - Désactiver les services de télémétrie, limiter le démarrage automatique, et préférer des notifications minimales via `mako`.
 
 ## Phase 5 : génération d’ISO avec live-build
-Un script prêt à l’emploi est fourni dans `scripts/build.sh`. Il prépare l’arborescence `live-build`, copie le profil Sway de l’utilisateur (s’il existe) ou utilise le modèle par défaut du dépôt (`sway/config`), puis injecte le lanceur sandbox Firefox :
+Un script prêt à l’emploi est fourni dans `scripts/build.sh`. Il prépare l’arborescence `live-build`, copie le profil Sway de l’utilisateur (s’il existe) ou utilise le modèle par défaut du dépôt (`sway/config`), puis injecte le lanceur sandbox Firefox. Le socle graphique et de confinement est défini dans `config/package-lists/core.list.chroot` (Sway, foot, wofi, bubblewrap, etc.) et un hook `config/hooks/live/001-permissions.chroot` garde les lanceurs sandbox exécutables tout en répliquant la configuration Sway de `/etc/skel` vers les comptes du live :
 ```bash
 chmod +x scripts/build.sh
 ./scripts/build.sh
 ```
 Prérequis côté hôte : Debian *testing/sid*, le paquet `live-build` et un accès root pour la création de l’image ISO.
+
+Pour étendre l’image, ajoutez vos paquets dans de nouveaux fichiers `config/package-lists/*.list.chroot` (ou complétez `core.list.chroot`), placez vos fichiers de configuration dans `config/includes.chroot/`, et créez des hooks supplémentaires sous `config/hooks/live/` pour automatiser les permissions ou post-installations.
 
 ## Stratégie d’itération
 1. **Prototype** : installer Debian *testing*, compiler le noyau durci, configurer Sway + un profil `bubblewrap` (Firefox) et vérifier la surface d’attaque (audit `seccomp`, `lsm`).

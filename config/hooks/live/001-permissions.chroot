@@ -1,0 +1,24 @@
+#!/bin/sh
+set -eu
+
+# Ensure sandbox launchers shipped in /usr/local/bin remain executable
+if [ -d /usr/local/bin ]; then
+  find /usr/local/bin -maxdepth 1 -type f \
+    \( -name '*-sandbox' -o -name '*-sandbox.sh' \) \
+    -exec chmod 0755 {} +
+fi
+
+# Propagate the default Sway configuration to any user homes missing it
+SKEL_SWAY="/etc/skel/.config/sway"
+if [ -d "$SKEL_SWAY" ]; then
+  for home in /home/*; do
+    [ -d "$home" ] || continue
+    target="$home/.config/sway"
+
+    if [ ! -d "$target" ]; then
+      mkdir -p "$target"
+      cp -a "$SKEL_SWAY/." "$target/"
+      chown -R "$(stat -c '%u:%g' "$home")" "$target"
+    fi
+  done
+fi

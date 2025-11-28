@@ -27,11 +27,11 @@ lb config \
   --iso-publisher "YourName" \
   --iso-volume "Kali-GOS-2025.1"
 
-# Package selection: core, web tools, and the Sway desktop (overwrite to avoid duplicates)
-mkdir -p config/package-lists
-cat > config/package-lists/my.list.chroot <<'EOF'
-kali-grapheneos-core kali-grapheneos-web-tools sway
-EOF
+# Package selection: rely on the repository-maintained lists in config/package-lists
+if [ ! -f config/package-lists/core.list.chroot ]; then
+  echo "[!] config/package-lists/core.list.chroot is missing; populate it with your base desktop and sandbox packages." >&2
+  exit 1
+fi
 
 # Include user configuration skeletons
 SWAY_DEST="config/includes.chroot/etc/skel/.config/sway"
