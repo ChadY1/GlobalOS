@@ -26,7 +26,8 @@ jobs:
             grub-pc-bin \
             grub-efi-amd64-bin \
             mtools \
-            dosfstools
+            dosfstools \
+            debian-archive-keyring
 
       - name: Enable unprivileged user namespaces
         run: |

@@ -21,6 +21,13 @@ require_cmd lb live-build
 require_cmd bwrap bubblewrap
 require_cmd xdg-dbus-proxy xdg-dbus-proxy
 require_cmd newuidmap uidmap
+require_cmd debootstrap debootstrap
+
+KEYRING="/usr/share/keyrings/debian-archive-keyring.gpg"
+if [ ! -f "${KEYRING}" ]; then
+  echo "[!] Debian archive keyring missing at ${KEYRING} (install package: debian-archive-keyring)." >&2
+  exit 1
+fi
 
 USERNS_SYSCTL="/proc/sys/kernel/unprivileged_userns_clone"
 if [ -f "${USERNS_SYSCTL}" ]; then
@@ -41,6 +48,9 @@ fi
 lb clean
 
 # Base configuration
+DEBIAN_MIRROR="http://deb.debian.org/debian"
+DEBIAN_SECURITY_MIRROR="http://deb.debian.org/debian-security"
+
 lb config \
   --distribution testing \
   --archive-areas "main contrib non-free non-free-firmware" \
@@ -50,7 +60,13 @@ lb config \
   --linux-packages "linux-image-amd64 linux-headers-amd64" \
   --iso-application "Global-K-OS" \
   --iso-publisher "GlobalOS" \
-  --iso-volume "Global-K-OS-1.0"
+  --iso-volume "Global-K-OS-1.0" \
+  --mirror-bootstrap "${DEBIAN_MIRROR}" \
+  --mirror-chroot "${DEBIAN_MIRROR}" \
+  --mirror-binary "${DEBIAN_MIRROR}" \
+  --mirror-chroot-security "${DEBIAN_SECURITY_MIRROR}" \
+  --mirror-binary-security "${DEBIAN_SECURITY_MIRROR}" \
+  --keyring "${KEYRING}"
 
 # Package selection: core desktop/tooling and meta-packages
 mkdir -p config/package-lists

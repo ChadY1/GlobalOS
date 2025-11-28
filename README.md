@@ -19,7 +19,7 @@ Global-K-OSv0.1 (version 1.0) fusionne l'arsenal d'outillage de **Kali Linux** a
 
 ### Checklist express
 1) **Hôte** : Debian *testing/sid* à jour (`sudo apt update && sudo apt full-upgrade`).
-2) **Paquets** : `sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap sha256sum qemu-utils` (le binaire fourni est `bwrap`).
+2) **Paquets** : `sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap debootstrap debian-archive-keyring sha256sum qemu-utils` (le binaire fourni est `bwrap`).
 3) **User namespaces** : `sudo sysctl -w kernel.unprivileged_userns_clone=1` (et persistance via `/etc/sysctl.d/99-userns.conf`).
 4) **Palette Sway** : garder `sway/config` ou déposer votre `~/.config/sway/config` pour un thème custom qui sera inclus.
 5) **Build** : exécuter `./scripts/build.sh` depuis la racine du dépôt.
@@ -29,7 +29,7 @@ Global-K-OSv0.1 (version 1.0) fusionne l'arsenal d'outillage de **Kali Linux** a
 ### Étapes détaillées
 ```bash
 # 1) Préparer
-sudo apt update && sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap sha256sum qemu-utils
+sudo apt update && sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap debootstrap debian-archive-keyring sha256sum qemu-utils
 echo 'kernel.unprivileged_userns_clone=1' | sudo tee /etc/sysctl.d/99-userns.conf
 sudo sysctl -p /etc/sysctl.d/99-userns.conf
 
