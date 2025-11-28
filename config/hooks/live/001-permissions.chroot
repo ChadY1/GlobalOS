@@ -15,3 +15,8 @@ else
     cp /usr/local/share/kali-grapheneos/sway/config /etc/skel/.config/sway/config
   fi
 fi
+
+# Ensure autostart login helpers stay readable
+if [ -f /etc/skel/.bash_profile ]; then
+  chmod 0644 /etc/skel/.bash_profile
+fi

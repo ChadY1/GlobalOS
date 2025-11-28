@@ -35,6 +35,7 @@ Le script :
 - Configure live-build pour Global-K-OS (nom, éditeur, volume, Debian testing, bootloader GRUB, installeur graphique).
 - Injecte la liste de paquets de base (`config/package-lists/core.list.chroot`), le profil Sway par défaut ou votre propre `~/.config/sway/config`, et le lanceur sandbox Firefox.
 - Applique le hook `config/hooks/live/001-permissions.chroot` pour conserver les droits d'exécution des lanceurs et les squelettes Sway.
+- Place les drop-ins système pour autologin sur `tty1` et démarrage automatique de **Sway** pour l'utilisateur live.
 - Construit l'ISO puis génère automatiquement un hash **SHA-256** (`<iso>.sha256`) pour vérification en ligne ou en CI.
 
 ### Vérifier le hash
@@ -59,8 +60,16 @@ Le checksum doit correspondre exactement au fichier `.sha256` généré. Publiez
   - `Super + d` : menu applicatif wofi
   - `Super + ←/→` : navigation workspaces
   - `Super + Shift + c` : recharger la config
+- Session live : autologin sur `tty1` et lancement automatique de Sway via `~/.bash_profile` pour éviter de rester en console.
 
 Pour personnaliser, placez votre propre `~/.config/sway/config` avant le build : il sera copié dans l'ISO pour tous les utilisateurs.
+
+### Paquets de base inclus (extrait)
+- Bureau Wayland : `sway`, `swaybg`, `swayidle`, `swaylock`, `waybar`, `foot`, `wofi`, `mako-notifier`, `seatd`.
+- Live/boot : `live-boot`, `live-config`, `systemd-sysv`, `dbus-user-session`, `policykit-1`.
+- Sandboxing : `bubblewrap`, `xdg-dbus-proxy`, `uidmap`.
+- Graphismes/audio : `mesa-utils`, `mesa-va-drivers`, `pipewire`, `wireplumber`, `alsa-utils`.
+- Réseau/outillage : `network-manager`, `network-manager-config-connectivity-debian`, `curl`, `iproute2`, `net-tools`.
 
 ---
 ## Noyau et socle système (rappel synthétique)
