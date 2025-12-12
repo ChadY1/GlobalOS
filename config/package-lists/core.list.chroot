@@ -12,12 +12,17 @@ seatd
 bubblewrap
 xdg-dbus-proxy
 uidmap
-# Live essentials and session plumbing
+# Live essentials and session plumbing (systemd backend to avoid sysvinit conflicts)
 live-boot
+live-boot-initramfs-tools
+initramfs-tools
 live-config
+live-config-systemd
 systemd-sysv
 dbus-user-session
-policykit-1
+# Kernel (explicitly selected to avoid live-build Contents lookups)
+linux-image-amd64
+linux-headers-amd64
 # Graphics and audio stack
 mesa-utils
 mesa-va-drivers
