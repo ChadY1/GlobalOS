@@ -1,4 +1,4 @@
-# Installation de Global-OS 3.0.1-beta sous VirtualBox (2010–2026)
+# Installation de Global-OS 4.0 sous VirtualBox (2010–2026)
 
 Ce guide couvre VirtualBox 4.x à 7.x sur hôtes Windows, macOS et Linux.
 
@@ -10,7 +10,7 @@ Ce guide couvre VirtualBox 4.x à 7.x sur hôtes Windows, macOS et Linux.
 
 ## Étapes
 1. **Créer la VM**
-   - Nom : `Global-OS 3.0.1-beta`
+   - Nom : `Global-OS 4.0`
    - Type : `Linux`, Version : `Debian (64-bit)`
    - Mémoire : 4096 Mo (ou plus selon votre RAM)
    - Disque : `VDI` dynamique, 20 Go+
@@ -28,7 +28,7 @@ Ce guide couvre VirtualBox 4.x à 7.x sur hôtes Windows, macOS et Linux.
    - Activer **Contrôleur graphique VMSVGA** et **Accélération 3D** si disponible.
 
 5. **Montage de l'ISO**
-   - Stockage → Contrôleur IDE/SATA → Ajouter un lecteur optique → Choisir le fichier ISO `Global-K-OS-3.0.1-beta.iso` (ou le nom généré par `scripts/build.sh`).
+   - Stockage → Contrôleur IDE/SATA → Ajouter un lecteur optique → Choisir le fichier ISO `Global-K-OS-4.0.iso` (ou le nom généré par `scripts/build.sh`).
 
 6. **Réseau**
    - Mode : `NAT` (simple) ou `Accès par pont` (si besoin d'une IP LAN visible par d'autres machines).
