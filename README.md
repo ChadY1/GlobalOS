@@ -1,6 +1,6 @@
-# Global-K-OS 2.0.0-alpha — guide de construction et d'installation
+# Global-K-OS 4.0 — guide de construction et d'installation
 
-Global-K-OS v2.0.0-alpha modernise la base 1.0 avec des réglages live-build compatibles 2010-2026 et conserve l'arsenal d'outillage de **Kali Linux** et la posture de sécurité renforcée de **GrapheneOS**, en s'appuyant sur Debian 13 (*trixie*, base stable) comme base de build.
+Global-K-OS v4.0 modernise la base 1.0 avec des réglages live-build compatibles 2010-2026 et conserve l'arsenal d'outillage de **Kali Linux** et la posture de sécurité renforcée de **GrapheneOS**, en s'appuyant sur Debian 13 (*trixie*, base stable) comme base de build.
 
 ## Objectifs
 - Reprendre les durcissements noyau et espace utilisateur de GrapheneOS tout en conservant la compatibilité des paquets Debian/Kali.
@@ -19,22 +19,23 @@ Global-K-OS v2.0.0-alpha modernise la base 1.0 avec des réglages live-build com
 
 ### Checklist express
 1) **Hôte** : Debian 13 (*trixie*) à jour (`sudo apt update && sudo apt full-upgrade`).
-2) **Paquets** : `sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap debootstrap debian-archive-keyring sha256sum qemu-utils` (le binaire fourni est `bwrap`).
+2) **Paquets** : `sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap debootstrap debian-archive-keyring qemu-utils` (le binaire fourni est `bwrap`).
 3) **User namespaces** : `sudo sysctl -w kernel.unprivileged_userns_clone=1` (et persistance via `/etc/sysctl.d/99-userns.conf`).
 4) **Palette Sway** : garder `sway/config` ou déposer votre `~/.config/sway/config` pour un thème custom qui sera inclus.
-5) **Build** : exécuter `./scripts/build.sh` depuis la racine du dépôt.
+5) **Build** : exécuter `./scripts/build.sh` depuis la racine du dépôt (vérifiez au besoin que `sha256sum` est présent via `command -v sha256sum`, il provient de `coreutils` normalement préinstallé).
 6) **Intégrité** : vérifier le hash généré (`sha256sum -c *.sha256`).
 7) **Validation** : booter l'ISO en VM UEFI puis sur matériel, avec autologin + Sway auto-start pour confirmer l'expérience utilisateur.
 
 ### Étapes détaillées
 ```bash
 # 1) Préparer
-sudo apt update && sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap debootstrap debian-archive-keyring sha256sum qemu-utils
+sudo apt update && sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap debootstrap debian-archive-keyring qemu-utils
 echo 'kernel.unprivileged_userns_clone=1' | sudo tee /etc/sysctl.d/99-userns.conf
 sudo sysctl -p /etc/sysctl.d/99-userns.conf
 
 # 2) Lancer la construction depuis la racine du dépôt
 chmod +x scripts/build.sh
+command -v sha256sum || echo "sha256sum (coreutils) n'est pas présent"
 ./scripts/build.sh
 
 # 3) Récupérer l'ISO et son hash (générés automatiquement)

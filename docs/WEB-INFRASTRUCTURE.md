@@ -1,4 +1,4 @@
-# Global-OS 2.0.0-alpha — infrastructure web globale
+# Global-OS 4.0 — infrastructure web globale
 
 Ce document décrit l'architecture technique pour `global-os.net` et ses sous-domaines ainsi que le raccordement au pipeline ISO.
 

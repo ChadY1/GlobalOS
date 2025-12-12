@@ -22,6 +22,7 @@ require_cmd bwrap bubblewrap
 require_cmd xdg-dbus-proxy xdg-dbus-proxy
 require_cmd newuidmap uidmap
 require_cmd debootstrap debootstrap
+require_cmd unshare util-linux
 
 USERNS_SYSCTL="/proc/sys/kernel/unprivileged_userns_clone"
 USERNS_MAX="/proc/sys/user/max_user_namespaces"
@@ -48,13 +49,35 @@ else
   exit 1
 fi
 
+# Basic sanity check: ensure we can mount proc/devpts inside an unprivileged user
+# namespace. Some container runtimes block these mounts unless started with
+# --privileged, which causes live-build to fail deep inside the bootstrap. A
+# quick self-test avoids the confusing downstream error.
+check_unpriv_mounts() {
+  local sandbox
+  sandbox="$(mktemp -d)"
+  mkdir -p "${sandbox}/proc" "${sandbox}/dev/pts"
+
+  if ! unshare -Ur sh -c 'set -e; mount -t proc proc "$1/proc"; mount -t devpts devpts "$1/dev/pts"' -- "${sandbox}" 2>/dev/null; then
+    echo "[!] Unable to mount proc/devpts inside an unprivileged user namespace." >&2
+    echo "    The host/container likely blocks user namespace mounts." >&2
+    echo "    Rerun inside a VM, on bare metal, or with a privileged container (docker run --privileged)." >&2
+    rm -rf "${sandbox}"
+    exit 1
+  fi
+
+  rm -rf "${sandbox}"
+}
+
+check_unpriv_mounts
+
 # Clean previous artifacts while keeping the tracked config tree intact
 lb clean --purge
 
 
 # Base configuration
 DEBIAN_MIRROR="http://deb.debian.org/debian"
-ISO_VERSION="2.0.0-alpha"
+ISO_VERSION="4.0"
 
 lb config \
   --mode debian \

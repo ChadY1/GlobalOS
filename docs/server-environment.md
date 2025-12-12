@@ -1,4 +1,4 @@
-# Global-OS Server Environment & Mirror Guide (2.0.0-alpha)
+# Global-OS Server Environment & Mirror Guide (4.0)
 
 This guide describes how to provision the dedicated server at `195.154.119.178` (behind Cloudflare `*.global-os.net`) to host ISO artifacts, package mirrors, and the web control endpoints without pulling external dependencies at build time.
 
@@ -53,7 +53,7 @@ This guide describes how to provision the dedicated server at `195.154.119.178` 
    ```
 2. Use `rsync` (already provided in `scripts/publish_to_website.sh`) to push artifacts from the build host:
    ```bash
-   ./scripts/publish_to_website.sh /path/to/GlobalOS/build/GLOBAL-OS-2.0.0-alpha.iso \
+  ./scripts/publish_to_website.sh /path/to/GlobalOS/build/GLOBAL-OS-4.0.iso \
      gkos@195.154.119.178:/srv/global-os/isos/
    ```
 3. Serve the site with nginx:
