@@ -31,3 +31,9 @@ int strcmp(const char *a, const char *b) {
     }
     return *(const unsigned char *)a - *(const unsigned char *)b;
 }
+
+void __stack_chk_fail(void) {
+    while (1) {
+        __asm__("cli; hlt");
+    }
+}

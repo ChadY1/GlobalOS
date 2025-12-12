@@ -1,0 +1,6 @@
+boot.bin
+kernel.bin
+*.o
+iso_root/
+global-os-prototype.iso
+global-os-prototype.iso.sha256

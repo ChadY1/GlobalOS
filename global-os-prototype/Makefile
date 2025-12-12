@@ -8,15 +8,15 @@ OBJS = kernel/kernel.o kernel/memory.o kernel/vga.o kernel/keyboard.o kernel/sch
 all: boot.bin kernel.bin
 
 boot.bin: boot/boot.asm
-$(NASM) -f bin $< -o $@
+	$(NASM) -f bin $< -o $@
 
 kernel.bin: $(OBJS)
-$(LD) $(LDFLAGS) -o $@ $(OBJS)
+	$(LD) $(LDFLAGS) -o $@ $(OBJS)
 
 %.o: %.c
-$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-rm -f $(OBJS) boot.bin kernel.bin
+	rm -f $(OBJS) boot.bin kernel.bin
 
 .PHONY: all clean

@@ -47,6 +47,29 @@ enable_a20:
     int 0x13
     jc disk_error
 
+disk_error:
+    mov si, disk_msg
+    call print_string
+    jmp hang16
+
+; Basic 16-bit string printer using BIOS teletype
+print_string:
+    pusha
+.next:
+    lodsb
+    cmp al, 0
+    je .done
+    mov ah, 0x0e
+    int 0x10
+    jmp .next
+.done:
+    popa
+    ret
+
+hang16:
+    hlt
+    jmp hang16
+
 ; Setup GDT
     lgdt [gdt_descriptor]
 
@@ -106,33 +129,14 @@ long_mode_entry:
     mov ss, ax
     mov rsp, 0x80000
 
-    extern kmain
-    mov rdi, BOOT_DRIVE
+    movzx rdi, byte [BOOT_DRIVE]
     lea rsi, [kernel_info]
-    call kmain
+    mov rax, [kernel_info]
+    call rax
 
 .hang:
     hlt
     jmp .hang
-
-disk_error:
-    mov si, disk_msg
-    call print_string
-    jmp .hang
-
-; Basic 16-bit string printer using BIOS teletype
-print_string:
-    pusha
-.next:
-    lodsb
-    cmp al, 0
-    je .done
-    mov ah, 0x0e
-    int 0x10
-    jmp .next
-.done:
-    popa
-    ret
 
 BOOT_DRIVE db 0
 kernel_info:
