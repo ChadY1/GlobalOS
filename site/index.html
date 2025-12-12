@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Global-OS 2.0.0-alpha</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #0a2a5a; color: #e6eef7; }
+    header, footer { padding: 1.5rem; background: #091a39; }
+    main { padding: 2rem; max-width: 960px; margin: auto; }
+    a { color: #7cc0ff; }
+    .card { background: #123366; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Global-OS 2.0.0-alpha</h1>
+  <p>Plateforme indépendante avec ISO live, sandbox graphique et API comptes minimale.</p>
+</header>
+<main>
+  <section class="card">
+    <h2>Téléchargements</h2>
+    <p>Les ISO et hashes sont publiés sur <code>/artifacts</code>. Exemple : <a href="/artifacts/">global-os.net/artifacts</a></p>
+  </section>
+  <section class="card">
+    <h2>Documentation</h2>
+    <ul>
+      <li><a href="/docs/WEB-INFRASTRUCTURE.md">Infrastructure web</a></li>
+      <li><a href="/docs/virtualbox-installation.md">Installation VirtualBox</a></li>
+      <li><a href="https://github.com/">Code source</a></li>
+    </ul>
+  </section>
+  <section class="card">
+    <h2>API comptes</h2>
+    <p>Endpoint : <code>https://api.global-os.net</code></p>
+    <p><code>POST /users</code> crée un compte, <code>POST /login</code> retourne un token HMAC, <code>GET /users</code> liste les comptes (admin).</p>
+  </section>
+</main>
+<footer>
+  <p>© 2025 Global-OS — v2.0.0-alpha</p>
+</footer>
+</body>
+</html>
