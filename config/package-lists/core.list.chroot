@@ -17,6 +17,9 @@ live-boot
 live-config
 systemd-sysv
 dbus-user-session
+# Kernel (explicitly selected to avoid live-build Contents lookups)
+linux-image-amd64
+linux-headers-amd64
 # Graphics and audio stack
 mesa-utils
 mesa-va-drivers
