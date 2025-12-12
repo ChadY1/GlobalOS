@@ -74,7 +74,7 @@ lb config \
 # Passing --keyring here currently triggers "Unsupported file ..." with newer
 # apt toolchains, so we keep the default trusted key configuration.
 
-# Package selection: core desktop/tooling and meta-packages
+# Package selection: core desktop/tooling
 mkdir -p config/package-lists
 # Avoid copying the same file onto itself (CI reported identical source/dest paths)
 CORE_SRC="${REPO_ROOT}/config/package-lists/core.list.chroot"
@@ -82,8 +82,11 @@ CORE_DST="config/package-lists/core.list.chroot"
 if [ "$(readlink -f "${CORE_SRC}")" != "$(readlink -f "${CORE_DST}")" ]; then
   cp -f "${CORE_SRC}" "${CORE_DST}"
 fi
-cat > config/package-lists/my.list.chroot <<'EOF_LIST'
-kali-grapheneos-core kali-grapheneos-web-tools sway
+
+# Extra packages limited to Debian mainline to avoid unavailable third-party deps
+cat > config/package-lists/extra.list.chroot <<'EOF_LIST'
+firefox-esr
+vim-tiny
 EOF_LIST
 
 # Include user configuration skeletons
