@@ -54,7 +54,6 @@ rm -rf config/package-lists config/includes.chroot config/hooks
 
 # Base configuration
 DEBIAN_MIRROR="http://deb.debian.org/debian"
-DEBIAN_SECURITY_MIRROR="http://deb.debian.org/debian-security"
 ISO_VERSION="2.0.0-alpha"
 
 lb config \
@@ -72,8 +71,7 @@ lb config \
   --mirror-bootstrap "${DEBIAN_MIRROR}" \
   --mirror-chroot "${DEBIAN_MIRROR}" \
   --mirror-binary "${DEBIAN_MIRROR}" \
-  --mirror-chroot-security "${DEBIAN_SECURITY_MIRROR}" \
-  --mirror-binary-security "${DEBIAN_SECURITY_MIRROR}"
+  --security false
 # NOTE: We rely on the default keyring handling inside live-build/apt.
 # Passing --keyring here currently triggers "Unsupported file ..." with newer
 # apt toolchains, so we keep the default trusted key configuration.
