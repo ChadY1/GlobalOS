@@ -12,12 +12,14 @@ seatd
 bubblewrap
 xdg-dbus-proxy
 uidmap
-# Live essentials and session plumbing
+# Live essentials and session plumbing (avoid policykit to reduce external deps)
 live-boot
 live-config
 systemd-sysv
 dbus-user-session
-policykit-1
+# Kernel (explicitly selected to avoid live-build Contents lookups)
+linux-image-amd64
+linux-headers-amd64
 # Graphics and audio stack
 mesa-utils
 mesa-va-drivers
