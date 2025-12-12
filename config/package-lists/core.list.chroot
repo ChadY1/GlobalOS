@@ -17,7 +17,8 @@ live-boot
 live-config
 systemd-sysv
 dbus-user-session
-policykit-1
+polkitd
+pkexec
 # Graphics and audio stack
 mesa-utils
 mesa-va-drivers
