@@ -54,7 +54,7 @@ lb clean --purge
 
 # Base configuration
 DEBIAN_MIRROR="http://deb.debian.org/debian"
-ISO_VERSION="2.0.0-alpha"
+ISO_VERSION="3.0.1-beta"
 
 lb config \
   --mode debian \
