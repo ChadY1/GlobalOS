@@ -23,12 +23,6 @@ require_cmd xdg-dbus-proxy xdg-dbus-proxy
 require_cmd newuidmap uidmap
 require_cmd debootstrap debootstrap
 
-KEYRING="/usr/share/keyrings/debian-archive-keyring.gpg"
-if [ ! -f "${KEYRING}" ]; then
-  echo "[!] Debian archive keyring missing at ${KEYRING} (install package: debian-archive-keyring)." >&2
-  exit 1
-fi
-
 USERNS_SYSCTL="/proc/sys/kernel/unprivileged_userns_clone"
 USERNS_MAX="/proc/sys/user/max_user_namespaces"
 if [ -f "${USERNS_SYSCTL}" ]; then
@@ -75,8 +69,10 @@ lb config \
   --mirror-chroot "${DEBIAN_MIRROR}" \
   --mirror-binary "${DEBIAN_MIRROR}" \
   --mirror-chroot-security "${DEBIAN_SECURITY_MIRROR}" \
-  --mirror-binary-security "${DEBIAN_SECURITY_MIRROR}" \
-  --keyring "${KEYRING}"
+  --mirror-binary-security "${DEBIAN_SECURITY_MIRROR}"
+# NOTE: We rely on the default keyring handling inside live-build/apt.
+# Passing --keyring here currently triggers "Unsupported file ..." with newer
+# apt toolchains, so we keep the default trusted key configuration.
 
 # Package selection: core desktop/tooling and meta-packages
 mkdir -p config/package-lists
