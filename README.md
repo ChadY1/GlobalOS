@@ -22,8 +22,10 @@ Global-K-OS v4.0 modernise la base 1.0 avec des réglages live-build compatibles
 2) **Paquets** : `sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap debootstrap debian-archive-keyring qemu-utils` (le binaire fourni est `bwrap`).
 3) **User namespaces** : `sudo sysctl -w kernel.unprivileged_userns_clone=1` (et persistance via `/etc/sysctl.d/99-userns.conf`).
 4) **Palette Sway** : garder `sway/config` ou déposer votre `~/.config/sway/config` pour un thème custom qui sera inclus.
-5) **Build** : exécuter `./scripts/build.sh` depuis la racine du dépôt (options disponibles pour changer le miroir, la version ISO, rejouer plusieurs tentatives via `--attempts` ou lancer un préflight rapide avec `--preflight-only`).
-6) **Validation** : booter l'ISO en VM UEFI puis sur matériel, avec autologin + Sway auto-start pour confirmer l'expérience utilisateur.
+5) **Build** : exécuter `./scripts/build.sh` depuis la racine du dépôt (vérifiez au besoin que `sha256sum` est présent via `command -v sha256sum`, il provient de `coreutils` normalement préinstallé).
+6) **Intégrité** : vérifier le hash généré (`sha256sum -c *.sha256`).
+7) **Validation** : booter l'ISO en VM UEFI puis sur matériel, avec autologin + Sway auto-start pour confirmer l'expérience utilisateur.
+8) **Option autoinstall** : le fichier de preseed `autoinstall/global-os.preseed` est intégré dans l'ISO sous `/preseed/global-os.preseed`. Au menu GRUB de l'installeur, appuyez sur `e` et ajoutez `auto=true priority=critical preseed/file=/preseed/global-os.preseed partman-auto/disk=/dev/sda` pour une installation non interactive (mettez à jour le disque/les identifiants avant usage).
 
 ### Étapes détaillées
 ```bash
@@ -46,6 +48,12 @@ ls -1 *.iso *.hybrid.iso
 - Chaque **pull request** lance le workflow GitHub Actions **Build ISO artifact** qui exécute `scripts/build.sh` sur un runner Ubuntu avec les dépendances requises (options utilisables dans le workflow via les arguments `--mirror`, `--iso-version` ou `--attempts`).
 - À la fin du run, l'ISO est publiée comme artifact nommé `global-k-os-iso`.
 - Pour récupérer l'image : onglet **Actions** → run **Build ISO artifact** correspondant à la PR → section **Artifacts** → télécharger `global-k-os-iso`.
+
+### Autoinstall / preseed
+- Fichier source : `autoinstall/global-os.preseed` (copié dans l'ISO sous `/preseed/global-os.preseed`).
+- Par défaut : locale `en_US.UTF-8`, clavier US, DHCP, utilisateur `global` / mot de passe `changeme`, partitionnement disque complet ext4 (`/dev/sda`).
+- Usage rapide en UEFI : dans le menu GRUB de l'installeur, `e` puis ajouter `auto=true priority=critical preseed/file=/preseed/global-os.preseed partman-auto/disk=/dev/sda`.
+- Sécurité : changez le disque cible et les identifiants avant déploiement sur serveur dédié; testez en VM d'abord.
 
 Le script :
 - Nettoie un éventuel build précédent (`lb clean --purge`).

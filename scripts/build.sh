@@ -100,6 +100,22 @@ if [ "${SKIP_DEPS_CHECK}" = true ] && [ "${PREFLIGHT_ONLY}" != true ]; then
   echo "[!] Dependency checks were skipped; the build may fail if tooling is missing." >&2
 fi
 
+# Validate that the host permits the bubblewrap mounts we need before doing
+# anything expensive. Some CI/containers block devpts/proc mounts even when
+# unprivileged user namespaces are enabled, which would otherwise fail halfway
+# through the live-build process.
+tmp_err="$(mktemp)"
+if ! bwrap --dev-bind / / --proc /proc --dev /dev true >"${tmp_err}" 2>&1; then
+  echo "[!] bubblewrap cannot create required mounts in this environment." >&2
+  echo "    The host/container likely blocks user-namespace mounts (e.g., proc/devpts)." >&2
+  echo "    Rerun inside a VM, on bare metal, or with a privileged container (docker run --privileged)." >&2
+  echo "    bubblewrap output:" >&2
+  cat "${tmp_err}" >&2 || true
+  rm -f "${tmp_err}"
+  exit 1
+fi
+rm -f "${tmp_err}"
+
 USERNS_SYSCTL="/proc/sys/kernel/unprivileged_userns_clone"
 USERNS_MAX="/proc/sys/user/max_user_namespaces"
 if [ -f "${USERNS_SYSCTL}" ]; then
@@ -204,9 +220,36 @@ EOF_LIST
   SHARED_SWAY="config/includes.chroot/usr/local/share/global-os/sway"
   mkdir -p "${SWAY_DEST}" "${SHARED_SWAY}"
 
-  # Always copy the repo-provided defaults to avoid host-specific dependencies
-  cp "${REPO_ROOT}/sway/config" "${SWAY_DEST}/"
-  cp "${REPO_ROOT}/sway/config" "${SHARED_SWAY}/config"
+# Autoinstall / preseed
+AUTOINSTALL_SRC="${REPO_ROOT}/autoinstall/global-os.preseed"
+AUTOINSTALL_DST="config/preseed/global-os.preseed"
+if [ -f "${AUTOINSTALL_SRC}" ]; then
+  mkdir -p "$(dirname "${AUTOINSTALL_DST}")"
+  cp -f "${AUTOINSTALL_SRC}" "${AUTOINSTALL_DST}"
+fi
+
+# Ensure the apt Contents disablement is applied inside the chroot as well
+APT_DISABLE_SRC="${REPO_ROOT}/config/apt/99disable-contents.conf"
+APT_DISABLE_DST="config/includes.chroot/etc/apt/apt.conf.d/99disable-contents.conf"
+mkdir -p "$(dirname "${APT_DISABLE_DST}")"
+cp -f "${APT_DISABLE_SRC}" "${APT_DISABLE_DST}"
+
+# Enforce the systemd backend by pinning live-config-sysvinit away inside the chroot
+APT_PREF_SRC="${REPO_ROOT}/config/apt/preferences.d/99live-config-backend.pref"
+APT_PREF_DST="config/includes.chroot/etc/apt/preferences.d/99live-config-backend.pref"
+mkdir -p "$(dirname "${APT_PREF_DST}")"
+cp -f "${APT_PREF_SRC}" "${APT_PREF_DST}"
+
+# Build the ISO
+lb build
+
+shopt -s nullglob
+ISO_CANDIDATES=("" ./*.hybrid.iso ./*.iso)
+if [ ${#ISO_CANDIDATES[@]} -gt 1 ]; then
+  ISO_PATH="${ISO_CANDIDATES[1]}"
+else
+  ISO_PATH=""
+fi
 
   mkdir -p config/includes.chroot/usr/local/bin
   cp sandbox/firefox-sandbox.sh config/includes.chroot/usr/local/bin/
