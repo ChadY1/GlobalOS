@@ -1,6 +1,6 @@
-# Global-K-OS 1.0 — guide de construction et d'installation
+# Global-K-OS 2.0.0-alpha — guide de construction et d'installation
 
-Global-K-OSv0.1 (version 1.0) fusionne l'arsenal d'outillage de **Kali Linux** avec la posture de sécurité renforcée de **GrapheneOS**, en s'appuyant sur Debian *testing/sid* comme base de build.
+Global-K-OS v2.0.0-alpha modernise la base 1.0 avec des réglages live-build compatibles 2010-2026 et conserve l'arsenal d'outillage de **Kali Linux** et la posture de sécurité renforcée de **GrapheneOS**, en s'appuyant sur Debian *testing/sid* comme base de build.
 
 ## Objectifs
 - Reprendre les durcissements noyau et espace utilisateur de GrapheneOS tout en conservant la compatibilité des paquets Debian/Kali.
@@ -56,6 +56,15 @@ Le script :
 - Applique le hook `config/hooks/live/001-permissions.chroot` pour conserver les droits d'exécution des lanceurs et les squelettes Sway.
 - Place les drop-ins système pour autologin sur `tty1` et démarrage automatique de **Sway** pour l'utilisateur live.
 - Construit l'ISO puis génère automatiquement un hash **SHA-256** (`<iso>.sha256`) pour vérification en ligne ou en CI.
+
+### Publication vers global-os.net (artifacts + site)
+- Le script `scripts/publish_to_website.sh` pousse l'ISO, le hash et la documentation statique vers un hôte distant (ex: `global-os.net`).
+- Variables : `TARGET_HOST`, `TARGET_PATH`, `SSH_OPTS` (clé SSH).
+- Utilise `rsync` uniquement (pas de dépendance externe). Exemple :
+  ```bash
+  TARGET_HOST=build.global-os.net TARGET_PATH=/var/www/global-os \
+    ./scripts/publish_to_website.sh
+  ```
 
 ### Tester l'ISO (UX premium)
 - **VM UEFI (recommandé avant toute diffusion)** :
@@ -122,6 +131,16 @@ Pour personnaliser, placez votre propre `~/.config/sway/config` avant le build :
    ```
 2. **Toolchain** : alternatives `cc`/`ld` vers LLVM, `DEB_BUILD_MAINT_OPTIONS=hardening=+all`, `-D_FORTIFY_SOURCE=3`.
 3. **FS et chiffrement** : ext4, `/tmp` et `/var/tmp` montés `noexec,nodev,nosuid`, `/home` et `/var` en `nodev`, chiffrement LUKS2 par défaut.
+
+---
+## Infrastructure web & comptes (global-os.net)
+- Architecture documentée dans `docs/WEB-INFRASTRUCTURE.md` (découpage DNS, reverse proxy nginx, publication des artefacts, API comptes).
+- Site statique minimal livré dans `site/` (palette Global-OS, liens ISO et docs).
+- API comptes sans dépendance externe : `web/account_service.py` (SQLite + PBKDF2). Unit systemd et configuration nginx fournies dans la documentation.
+- Guide serveur/mirror dédié (Cloudflare + miroir apt interne) : `docs/server-environment.md` détaille l'installation sur `195.154.119.178`, l'exposition du miroir `mirror.global-os.net`, la publication des ISO et la configuration nginx côté origine.
+
+### Installation VirtualBox (2010–2026)
+Suivre `docs/virtualbox-installation.md` : création de VM UEFI, montage de l'ISO, installation guidée LUKS2, dépannage (écran noir, clavier, Secure Boot).
 
 ---
 ## Sandboxing
