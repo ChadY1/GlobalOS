@@ -89,18 +89,14 @@ firefox-esr
 vim-tiny
 EOF_LIST
 
-# Include user configuration skeletons
+# Include user configuration skeletons without relying on external themes
 SWAY_DEST="config/includes.chroot/etc/skel/.config/sway"
-SHARED_SWAY="config/includes.chroot/usr/local/share/kali-grapheneos/sway"
+SHARED_SWAY="config/includes.chroot/usr/local/share/global-os/sway"
 mkdir -p "${SWAY_DEST}" "${SHARED_SWAY}"
 
-if [ -f "${HOME}/.config/sway/config" ]; then
-  cp "${HOME}/.config/sway/config" "${SWAY_DEST}/"
-  cp "${HOME}/.config/sway/config" "${SHARED_SWAY}/config"
-else
-  cp "${REPO_ROOT}/sway/config" "${SWAY_DEST}/"
-  cp "${REPO_ROOT}/sway/config" "${SHARED_SWAY}/config"
-fi
+# Always copy the repo-provided defaults to avoid host-specific dependencies
+cp "${REPO_ROOT}/sway/config" "${SWAY_DEST}/"
+cp "${REPO_ROOT}/sway/config" "${SHARED_SWAY}/config"
 
 mkdir -p config/includes.chroot/usr/local/bin
 cp sandbox/firefox-sandbox.sh config/includes.chroot/usr/local/bin/
