@@ -137,6 +137,7 @@ Pour personnaliser, placez votre propre `~/.config/sway/config` avant le build :
 - Architecture documentée dans `docs/WEB-INFRASTRUCTURE.md` (découpage DNS, reverse proxy nginx, publication des artefacts, API comptes).
 - Site statique minimal livré dans `site/` (palette Global-OS, liens ISO et docs).
 - API comptes sans dépendance externe : `web/account_service.py` (SQLite + PBKDF2). Unit systemd et configuration nginx fournies dans la documentation.
+- Guide serveur/mirror dédié (Cloudflare + miroir apt interne) : `docs/server-environment.md` détaille l'installation sur `195.154.119.178`, l'exposition du miroir `mirror.global-os.net`, la publication des ISO et la configuration nginx côté origine.
 
 ### Installation VirtualBox (2010–2026)
 Suivre `docs/virtualbox-installation.md` : création de VM UEFI, montage de l'ISO, installation guidée LUKS2, dépannage (écran noir, clavier, Secure Boot).

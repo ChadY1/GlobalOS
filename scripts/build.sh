@@ -112,6 +112,12 @@ if [ "$(readlink -f "${HOOK_SRC}")" != "$(readlink -f "${HOOK_DST}")" ]; then
   cp -f "${HOOK_SRC}" "${HOOK_DST}"
 fi
 
+# Ensure the apt Contents disablement is applied inside the chroot as well
+APT_DISABLE_SRC="${REPO_ROOT}/config/apt/99disable-contents.conf"
+APT_DISABLE_DST="config/includes.chroot/etc/apt/apt.conf.d/99disable-contents.conf"
+mkdir -p "$(dirname "${APT_DISABLE_DST}")"
+cp -f "${APT_DISABLE_SRC}" "${APT_DISABLE_DST}"
+
 # Build the ISO
 lb build
 
