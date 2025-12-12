@@ -63,8 +63,7 @@ lb config \
   --debian-installer live \
   --bootloader grub \
   --debian-installer-gui true \
-  --linux-packages "linux-image linux-headers" \
-  --linux-flavours "amd64" \
+  --linux-packages none \
   --iso-application "Global-K-OS" \
   --iso-publisher "GlobalOS" \
   --iso-volume "Global-K-OS-${ISO_VERSION}" \

@@ -114,7 +114,7 @@ Pour personnaliser, placez votre propre `~/.config/sway/config` avant le build :
 
 ### Paquets de base inclus (extrait)
 - Bureau Wayland : `sway`, `swaybg`, `swayidle`, `swaylock`, `waybar`, `foot`, `wofi`, `mako-notifier`, `seatd`.
-- Live/boot : `live-boot`, `live-config`, `systemd-sysv`, `dbus-user-session`, `policykit-1`.
+- Live/boot : `live-boot`, `live-boot-initramfs-tools`, `live-config`, `live-config-systemd`, `systemd-sysv`, `dbus-user-session`.
 - Sandboxing : `bubblewrap`, `xdg-dbus-proxy`, `uidmap`.
 - Graphismes/audio : `mesa-utils`, `mesa-va-drivers`, `pipewire`, `wireplumber`, `alsa-utils`.
 - Réseau/outillage : `network-manager`, `network-manager-config-connectivity-debian`, `curl`, `iproute2`, `net-tools`.
