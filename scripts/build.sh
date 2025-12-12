@@ -23,6 +23,22 @@ require_cmd xdg-dbus-proxy xdg-dbus-proxy
 require_cmd newuidmap uidmap
 require_cmd debootstrap debootstrap
 
+# Validate that the host permits the bubblewrap mounts we need before doing
+# anything expensive. Some CI/containers block devpts/proc mounts even when
+# unprivileged user namespaces are enabled, which would otherwise fail halfway
+# through the live-build process.
+tmp_err="$(mktemp)"
+if ! bwrap --dev-bind / / --proc /proc --dev /dev true >"${tmp_err}" 2>&1; then
+  echo "[!] bubblewrap cannot create required mounts in this environment." >&2
+  echo "    The host/container likely blocks user-namespace mounts (e.g., proc/devpts)." >&2
+  echo "    Rerun inside a VM, on bare metal, or with a privileged container (docker run --privileged)." >&2
+  echo "    bubblewrap output:" >&2
+  cat "${tmp_err}" >&2 || true
+  rm -f "${tmp_err}"
+  exit 1
+fi
+rm -f "${tmp_err}"
+
 USERNS_SYSCTL="/proc/sys/kernel/unprivileged_userns_clone"
 USERNS_MAX="/proc/sys/user/max_user_namespaces"
 if [ -f "${USERNS_SYSCTL}" ]; then
@@ -109,6 +125,14 @@ HOOK_SRC="${REPO_ROOT}/config/hooks/live/001-permissions.chroot"
 HOOK_DST="config/hooks/live/001-permissions.chroot"
 if [ "$(readlink -f "${HOOK_SRC}")" != "$(readlink -f "${HOOK_DST}")" ]; then
   cp -f "${HOOK_SRC}" "${HOOK_DST}"
+fi
+
+# Autoinstall / preseed
+AUTOINSTALL_SRC="${REPO_ROOT}/autoinstall/global-os.preseed"
+AUTOINSTALL_DST="config/preseed/global-os.preseed"
+if [ -f "${AUTOINSTALL_SRC}" ]; then
+  mkdir -p "$(dirname "${AUTOINSTALL_DST}")"
+  cp -f "${AUTOINSTALL_SRC}" "${AUTOINSTALL_DST}"
 fi
 
 # Ensure the apt Contents disablement is applied inside the chroot as well

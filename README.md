@@ -25,6 +25,7 @@ Global-K-OS v3.0.1-beta modernise la base 1.0 avec des réglages live-build comp
 5) **Build** : exécuter `./scripts/build.sh` depuis la racine du dépôt (vérifiez au besoin que `sha256sum` est présent via `command -v sha256sum`, il provient de `coreutils` normalement préinstallé).
 6) **Intégrité** : vérifier le hash généré (`sha256sum -c *.sha256`).
 7) **Validation** : booter l'ISO en VM UEFI puis sur matériel, avec autologin + Sway auto-start pour confirmer l'expérience utilisateur.
+8) **Option autoinstall** : le fichier de preseed `autoinstall/global-os.preseed` est intégré dans l'ISO sous `/preseed/global-os.preseed`. Au menu GRUB de l'installeur, appuyez sur `e` et ajoutez `auto=true priority=critical preseed/file=/preseed/global-os.preseed partman-auto/disk=/dev/sda` pour une installation non interactive (mettez à jour le disque/les identifiants avant usage).
 
 ### Étapes détaillées
 ```bash
@@ -49,6 +50,12 @@ sha256sum -c *.sha256
 - Chaque **pull request** lance le workflow GitHub Actions **Build ISO artifact** qui exécute `scripts/build.sh` sur un runner Ubuntu avec les dépendances requises.
 - À la fin du run, l'ISO et son hash `.sha256` sont publiés comme artifact nommé `global-k-os-iso`.
 - Pour récupérer l'image : onglet **Actions** → run **Build ISO artifact** correspondant à la PR → section **Artifacts** → télécharger `global-k-os-iso`.
+
+### Autoinstall / preseed
+- Fichier source : `autoinstall/global-os.preseed` (copié dans l'ISO sous `/preseed/global-os.preseed`).
+- Par défaut : locale `en_US.UTF-8`, clavier US, DHCP, utilisateur `global` / mot de passe `changeme`, partitionnement disque complet ext4 (`/dev/sda`).
+- Usage rapide en UEFI : dans le menu GRUB de l'installeur, `e` puis ajouter `auto=true priority=critical preseed/file=/preseed/global-os.preseed partman-auto/disk=/dev/sda`.
+- Sécurité : changez le disque cible et les identifiants avant déploiement sur serveur dédié; testez en VM d'abord.
 
 Le script :
 - Nettoie un éventuel build précédent (`lb clean --purge`).
