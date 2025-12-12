@@ -11,8 +11,8 @@ if [ -f /etc/skel/.config/sway/config ]; then
   chmod 0644 /etc/skel/.config/sway/config
 else
   mkdir -p /etc/skel/.config/sway
-  if [ -f /usr/local/share/kali-grapheneos/sway/config ]; then
-    cp /usr/local/share/kali-grapheneos/sway/config /etc/skel/.config/sway/config
+  if [ -f /usr/local/share/global-os/sway/config ]; then
+    cp /usr/local/share/global-os/sway/config /etc/skel/.config/sway/config
   fi
 fi
 
