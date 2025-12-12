@@ -1,12 +1,12 @@
-# Global-K-OS 2.0.0-alpha — guide de construction et d'installation
+# Global-K-OS 4.0 — guide de construction et d'installation
 
-Global-K-OS v2.0.0-alpha modernise la base 1.0 avec des réglages live-build compatibles 2010-2026 et conserve l'arsenal d'outillage de **Kali Linux** et la posture de sécurité renforcée de **GrapheneOS**, en s'appuyant sur Debian 13 (*trixie*, base stable) comme base de build.
+Global-K-OS v4.0 modernise la base 1.0 avec des réglages live-build compatibles 2010-2026 et conserve l'arsenal d'outillage de **Kali Linux** et la posture de sécurité renforcée de **GrapheneOS**, en s'appuyant sur Debian 13 (*trixie*, base stable) comme base de build.
 
 ## Objectifs
 - Reprendre les durcissements noyau et espace utilisateur de GrapheneOS tout en conservant la compatibilité des paquets Debian/Kali.
 - Fournir un environnement bureautique minimaliste basé sur Wayland, avec un sandboxing strict pour chaque application graphique.
 - Distribuer l'arsenal d'outils (tests de sécurité, forensic, analyse réseau) via des méta-paquets thématiques accompagnés de profils de confinement et d'un cadrage d'usage défensif.
-- Garantir une délivrabilité professionnelle : build reproductible, hash SHA-256 publié, UX cohérente (palette Globaleurope.fr/home).
+- Garantir une délivrabilité professionnelle : build reproductible, UX cohérente (palette Globaleurope.fr/home).
 
 ### Cadre d'usage et conformité
 - Positionnement prioritaire : défense, résilience, conformité et entraînement (pas d'automatisation de l'usage de la force ni d'outillage offensif par défaut).
@@ -19,34 +19,32 @@ Global-K-OS v2.0.0-alpha modernise la base 1.0 avec des réglages live-build com
 
 ### Checklist express
 1) **Hôte** : Debian 13 (*trixie*) à jour (`sudo apt update && sudo apt full-upgrade`).
-2) **Paquets** : `sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap debootstrap debian-archive-keyring sha256sum qemu-utils` (le binaire fourni est `bwrap`).
+2) **Paquets** : `sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap debootstrap debian-archive-keyring qemu-utils` (le binaire fourni est `bwrap`).
 3) **User namespaces** : `sudo sysctl -w kernel.unprivileged_userns_clone=1` (et persistance via `/etc/sysctl.d/99-userns.conf`).
 4) **Palette Sway** : garder `sway/config` ou déposer votre `~/.config/sway/config` pour un thème custom qui sera inclus.
-5) **Build** : exécuter `./scripts/build.sh` depuis la racine du dépôt.
-6) **Intégrité** : vérifier le hash généré (`sha256sum -c *.sha256`).
-7) **Validation** : booter l'ISO en VM UEFI puis sur matériel, avec autologin + Sway auto-start pour confirmer l'expérience utilisateur.
+5) **Build** : exécuter `./scripts/build.sh` depuis la racine du dépôt (options disponibles pour changer le miroir, la version ISO, rejouer plusieurs tentatives via `--attempts` ou lancer un préflight rapide avec `--preflight-only`).
+6) **Validation** : booter l'ISO en VM UEFI puis sur matériel, avec autologin + Sway auto-start pour confirmer l'expérience utilisateur.
 
 ### Étapes détaillées
 ```bash
 # 1) Préparer
-sudo apt update && sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap debootstrap debian-archive-keyring sha256sum qemu-utils
+sudo apt update && sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap debootstrap debian-archive-keyring qemu-utils
 echo 'kernel.unprivileged_userns_clone=1' | sudo tee /etc/sysctl.d/99-userns.conf
 sudo sysctl -p /etc/sysctl.d/99-userns.conf
 
 # 2) Lancer la construction depuis la racine du dépôt
 chmod +x scripts/build.sh
-./scripts/build.sh
+# Optionnel : préflight léger (dépendances facultatives) puis build complet
+./scripts/build.sh --preflight-only --skip-deps-check
+./scripts/build.sh --attempts 2  # exemple : rejouer automatiquement en cas d'échec
 
-# 3) Récupérer l'ISO et son hash (générés automatiquement)
-ls -1 *.iso *.hybrid.iso *.sha256
-
-# 4) Vérifier l'intégrité
-sha256sum -c *.sha256
+# 3) Récupérer l'ISO générée
+ls -1 *.iso *.hybrid.iso
 ```
 
 ### Build CI GitHub (artifact ISO automatique)
-- Chaque **pull request** lance le workflow GitHub Actions **Build ISO artifact** qui exécute `scripts/build.sh` sur un runner Ubuntu avec les dépendances requises.
-- À la fin du run, l'ISO et son hash `.sha256` sont publiés comme artifact nommé `global-k-os-iso`.
+- Chaque **pull request** lance le workflow GitHub Actions **Build ISO artifact** qui exécute `scripts/build.sh` sur un runner Ubuntu avec les dépendances requises (options utilisables dans le workflow via les arguments `--mirror`, `--iso-version` ou `--attempts`).
+- À la fin du run, l'ISO est publiée comme artifact nommé `global-k-os-iso`.
 - Pour récupérer l'image : onglet **Actions** → run **Build ISO artifact** correspondant à la PR → section **Artifacts** → télécharger `global-k-os-iso`.
 
 Le script :
@@ -55,7 +53,7 @@ Le script :
 - Injecte la liste de paquets de base (`config/package-lists/core.list.chroot`), le profil Sway par défaut ou votre propre `~/.config/sway/config`, et le lanceur sandbox Firefox.
 - Applique le hook `config/hooks/live/001-permissions.chroot` pour conserver les droits d'exécution des lanceurs et les squelettes Sway.
 - Place les drop-ins système pour autologin sur `tty1` et démarrage automatique de **Sway** pour l'utilisateur live.
-- Construit l'ISO puis génère automatiquement un hash **SHA-256** (`<iso>.sha256`) pour vérification en ligne ou en CI.
+- Construit l'ISO (options personnalisables : miroir, version ISO, nombre de tentatives via `--attempts`, préflight seul via `--preflight-only`).
 
 ### Publication vers global-os.net (artifacts + site)
 - Le script `scripts/publish_to_website.sh` pousse l'ISO, le hash et la documentation statique vers un hôte distant (ex: `global-os.net`).
@@ -91,7 +89,7 @@ L'ISO inclut l'installeur Debian (mode graphique). Pour une installation « prod
 - Conservez l'utilisateur live uniquement pour la session éphémère ; créez un compte dédié avec clé SSH et mot de passe robuste.
 
 ### Contrôles finaux avant diffusion
-- **Hash** : le `.sha256` doit correspondre byte pour byte à l'ISO publiée.
+- **Hash (optionnel)** : si vous publiez un `.sha256` généré manuellement, vérifiez qu'il correspond byte pour byte à l'ISO publiée.
 - **UX** : l'autologin doit lancer Sway immédiatement (palette Globaleurope.fr/home), `Super+Enter` et `Super+d` doivent fonctionner.
 - **Réseau** : `NetworkManager` opérationnel, `pipewire` audio OK, sandbox Firefox exécutable (`/usr/local/bin/firefox-sandbox.sh`).
 - **Confinement** : vérifier `bwrap` (paquet `bubblewrap`) et `xdg-dbus-proxy` présents via `which` dans la session live.
@@ -168,7 +166,7 @@ Suivre `docs/virtualbox-installation.md` : création de VM UEFI, montage de l'IS
 ## Stratégie d’itération
 1. **Prototype** : installer Debian testing, compiler le noyau durci, configurer Sway + un profil `bubblewrap` (Firefox) et vérifier la surface d’attaque (`seccomp`, `lsm`).
 2. **Industrialiser** : généraliser les profils de sandbox, créer les méta-paquets, renforcer la toolchain par défaut.
-3. **Automatiser** : intégrer les scripts live-build dans CI, publier des ISO signées, exposer le hash SHA-256 généré par `scripts/build.sh`.
+3. **Automatiser** : intégrer les scripts live-build dans CI, publier des ISO signées, exposer un hash SHA-256 si vous le générez manuellement (non produit automatiquement par `scripts/build.sh`).
 4. **Contribuer** : synchroniser les patchs amont (KSPP/GrapheneOS), suivre les CVE et mettre à jour les profils de confinement.
 
 ---
