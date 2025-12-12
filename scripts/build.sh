@@ -48,8 +48,9 @@ else
   exit 1
 fi
 
-# Clean previous artifacts
+# Clean previous artifacts and stale configuration to avoid host-specific package lists (e.g., "casper")
 lb clean
+rm -rf config/package-lists config/includes.chroot config/hooks
 
 # Base configuration
 DEBIAN_MIRROR="http://deb.debian.org/debian"
@@ -57,6 +58,7 @@ DEBIAN_SECURITY_MIRROR="http://deb.debian.org/debian-security"
 ISO_VERSION="2.0.0-alpha"
 
 lb config \
+  --mode debian \
   --distribution testing \
   --archive-areas "main contrib non-free non-free-firmware" \
   --debian-installer live \
@@ -76,7 +78,7 @@ lb config \
 # Passing --keyring here currently triggers "Unsupported file ..." with newer
 # apt toolchains, so we keep the default trusted key configuration.
 
-# Package selection: core desktop/tooling
+# Package selection: core desktop/tooling (recreate clean tree every run)
 mkdir -p config/package-lists
 # Avoid copying the same file onto itself (CI reported identical source/dest paths)
 CORE_SRC="${REPO_ROOT}/config/package-lists/core.list.chroot"
