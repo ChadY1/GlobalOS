@@ -1,0 +1,7 @@
+Package: live-config-sysvinit
+Pin: release *
+Pin-Priority: -1
+
+Package: live-config-systemd
+Pin: release *
+Pin-Priority: 990

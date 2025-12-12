@@ -1,6 +1,6 @@
 # Global-K-OS 2.0.0-alpha — guide de construction et d'installation
 
-Global-K-OS v2.0.0-alpha modernise la base 1.0 avec des réglages live-build compatibles 2010-2026 et conserve l'arsenal d'outillage de **Kali Linux** et la posture de sécurité renforcée de **GrapheneOS**, en s'appuyant sur Debian *testing/sid* comme base de build.
+Global-K-OS v2.0.0-alpha modernise la base 1.0 avec des réglages live-build compatibles 2010-2026 et conserve l'arsenal d'outillage de **Kali Linux** et la posture de sécurité renforcée de **GrapheneOS**, en s'appuyant sur Debian 13 (*trixie*, base stable) comme base de build.
 
 ## Objectifs
 - Reprendre les durcissements noyau et espace utilisateur de GrapheneOS tout en conservant la compatibilité des paquets Debian/Kali.
@@ -18,7 +18,7 @@ Global-K-OS v2.0.0-alpha modernise la base 1.0 avec des réglages live-build com
 ## Construction et installation premium (production-ready)
 
 ### Checklist express
-1) **Hôte** : Debian *testing/sid* à jour (`sudo apt update && sudo apt full-upgrade`).
+1) **Hôte** : Debian 13 (*trixie*) à jour (`sudo apt update && sudo apt full-upgrade`).
 2) **Paquets** : `sudo apt install live-build bubblewrap xdg-dbus-proxy uidmap debootstrap debian-archive-keyring sha256sum qemu-utils` (le binaire fourni est `bwrap`).
 3) **User namespaces** : `sudo sysctl -w kernel.unprivileged_userns_clone=1` (et persistance via `/etc/sysctl.d/99-userns.conf`).
 4) **Palette Sway** : garder `sway/config` ou déposer votre `~/.config/sway/config` pour un thème custom qui sera inclus.
@@ -50,8 +50,8 @@ sha256sum -c *.sha256
 - Pour récupérer l'image : onglet **Actions** → run **Build ISO artifact** correspondant à la PR → section **Artifacts** → télécharger `global-k-os-iso`.
 
 Le script :
-- Nettoie un éventuel build précédent (`lb clean`).
-- Configure live-build pour Global-K-OS (nom, éditeur, volume, Debian testing, bootloader GRUB, installeur graphique).
+- Nettoie un éventuel build précédent (`lb clean --purge`).
+- Configure live-build pour Global-K-OS (nom, éditeur, volume, Debian 13 trixie, bootloader GRUB, installeur graphique).
 - Injecte la liste de paquets de base (`config/package-lists/core.list.chroot`), le profil Sway par défaut ou votre propre `~/.config/sway/config`, et le lanceur sandbox Firefox.
 - Applique le hook `config/hooks/live/001-permissions.chroot` pour conserver les droits d'exécution des lanceurs et les squelettes Sway.
 - Place les drop-ins système pour autologin sur `tty1` et démarrage automatique de **Sway** pour l'utilisateur live.

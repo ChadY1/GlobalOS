@@ -48,9 +48,9 @@ else
   exit 1
 fi
 
-# Clean previous artifacts and stale configuration to avoid host-specific package lists (e.g., "casper")
-lb clean
-rm -rf config/package-lists config/includes.chroot config/hooks
+# Clean previous artifacts while keeping the tracked config tree intact
+lb clean --purge
+
 
 # Base configuration
 DEBIAN_MIRROR="http://deb.debian.org/debian"
@@ -58,7 +58,7 @@ ISO_VERSION="2.0.0-alpha"
 
 lb config \
   --mode debian \
-  --distribution testing \
+  --distribution trixie \
   --archive-areas "main contrib non-free non-free-firmware" \
   --debian-installer live \
   --bootloader grub \
@@ -116,6 +116,12 @@ APT_DISABLE_SRC="${REPO_ROOT}/config/apt/99disable-contents.conf"
 APT_DISABLE_DST="config/includes.chroot/etc/apt/apt.conf.d/99disable-contents.conf"
 mkdir -p "$(dirname "${APT_DISABLE_DST}")"
 cp -f "${APT_DISABLE_SRC}" "${APT_DISABLE_DST}"
+
+# Enforce the systemd backend by pinning live-config-sysvinit away inside the chroot
+APT_PREF_SRC="${REPO_ROOT}/config/apt/preferences.d/99live-config-backend.pref"
+APT_PREF_DST="config/includes.chroot/etc/apt/preferences.d/99live-config-backend.pref"
+mkdir -p "$(dirname "${APT_PREF_DST}")"
+cp -f "${APT_PREF_SRC}" "${APT_PREF_DST}"
 
 # Build the ISO
 lb build

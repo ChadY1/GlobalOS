@@ -3,7 +3,7 @@
 This guide describes how to provision the dedicated server at `195.154.119.178` (behind Cloudflare `*.global-os.net`) to host ISO artifacts, package mirrors, and the web control endpoints without pulling external dependencies at build time.
 
 ## 1. Base OS setup
-- Install a minimal Debian 12/13 on the dedicated server; choose only `SSH server` and `standard system utilities`.
+- Install a minimal Debian 13 (trixie) on the dedicated server; choose only `SSH server` and `standard system utilities`.
 - Create a non-root deployment user (e.g., `gkos`) with `sudo` privileges.
 - Ensure outbound HTTPS access to `deb.debian.org` for initial package installation; after the mirror is seeded, builds rely solely on the local mirror.
 
@@ -13,14 +13,14 @@ This guide describes how to provision the dedicated server at `195.154.119.178` 
    sudo apt-get update
    sudo apt-get install -y apt-mirror nginx
    ```
-2. Configure `/etc/apt/mirror.list` to mirror only Debian testing main/contrib/non-free/non-free-firmware (no Contents indexes):
+2. Configure `/etc/apt/mirror.list` to mirror only Debian 13 (trixie) main/contrib/non-free/non-free-firmware (no Contents indexes):
    ```
    set base_path    /srv/apt-mirror
    set nthreads     10
    set _tilde 0
 
-   deb http://deb.debian.org/debian testing main contrib non-free non-free-firmware
-   deb http://deb.debian.org/debian testing-updates main contrib non-free non-free-firmware
+   deb http://deb.debian.org/debian trixie main contrib non-free non-free-firmware
+   deb http://deb.debian.org/debian trixie-updates main contrib non-free non-free-firmware
 
    clean http://deb.debian.org/debian
    ```

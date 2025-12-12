@@ -15,6 +15,7 @@ uidmap
 # Live essentials and session plumbing (systemd backend to avoid sysvinit conflicts)
 live-boot
 live-boot-initramfs-tools
+initramfs-tools
 live-config
 live-config-systemd
 systemd-sysv
