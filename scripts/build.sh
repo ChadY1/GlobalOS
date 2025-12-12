@@ -30,6 +30,7 @@ if [ ! -f "${KEYRING}" ]; then
 fi
 
 USERNS_SYSCTL="/proc/sys/kernel/unprivileged_userns_clone"
+USERNS_MAX="/proc/sys/user/max_user_namespaces"
 if [ -f "${USERNS_SYSCTL}" ]; then
   USERNS_VALUE="$(cat "${USERNS_SYSCTL}")"
   if [ "${USERNS_VALUE}" != "1" ]; then
@@ -38,8 +39,17 @@ if [ -f "${USERNS_SYSCTL}" ]; then
     echo "    Persist (root): echo 'kernel.unprivileged_userns_clone=1' | sudo tee /etc/sysctl.d/99-userns.conf" >&2
     exit 1
   fi
+elif [ -f "${USERNS_MAX}" ]; then
+  USERNS_MAX_VALUE="$(cat "${USERNS_MAX}")"
+  if [ "${USERNS_MAX_VALUE}" -eq 0 ]; then
+    echo "[!] User namespaces are disabled (user.max_user_namespaces=0)." >&2
+    echo "    Enable temporarily: sudo sysctl -w user.max_user_namespaces=1024" >&2
+    echo "    Persist (root): echo 'user.max_user_namespaces=1024' | sudo tee /etc/sysctl.d/99-userns.conf" >&2
+    exit 1
+  fi
+  echo "[+] user.max_user_namespaces=${USERNS_MAX_VALUE} (kernel.unprivileged_userns_clone not present)."
 else
-  echo "[!] Cannot detect unprivileged user namespace support at ${USERNS_SYSCTL}." >&2
+  echo "[!] Cannot detect unprivileged user namespace support (no ${USERNS_SYSCTL} or ${USERNS_MAX})." >&2
   echo "    Please ensure user namespaces are enabled before building." >&2
   exit 1
 fi
