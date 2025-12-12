@@ -54,6 +54,7 @@ lb clean
 # Base configuration
 DEBIAN_MIRROR="http://deb.debian.org/debian"
 DEBIAN_SECURITY_MIRROR="http://deb.debian.org/debian-security"
+ISO_VERSION="2.0.0-alpha"
 
 lb config \
   --distribution testing \
@@ -61,10 +62,11 @@ lb config \
   --debian-installer live \
   --bootloader grub \
   --debian-installer-gui true \
-  --linux-packages "linux-image-amd64 linux-headers-amd64" \
+  --linux-packages "linux-image linux-headers" \
+  --linux-flavours "amd64" \
   --iso-application "Global-K-OS" \
   --iso-publisher "GlobalOS" \
-  --iso-volume "Global-K-OS-1.0" \
+  --iso-volume "Global-K-OS-${ISO_VERSION}" \
   --mirror-bootstrap "${DEBIAN_MIRROR}" \
   --mirror-chroot "${DEBIAN_MIRROR}" \
   --mirror-binary "${DEBIAN_MIRROR}" \

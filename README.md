@@ -1,6 +1,6 @@
-# Global-K-OS 1.0 — guide de construction et d'installation
+# Global-K-OS 2.0.0-alpha — guide de construction et d'installation
 
-Global-K-OSv0.1 (version 1.0) fusionne l'arsenal d'outillage de **Kali Linux** avec la posture de sécurité renforcée de **GrapheneOS**, en s'appuyant sur Debian *testing/sid* comme base de build.
+Global-K-OS v2.0.0-alpha modernise la base 1.0 avec des réglages live-build compatibles 2010-2026 et conserve l'arsenal d'outillage de **Kali Linux** et la posture de sécurité renforcée de **GrapheneOS**, en s'appuyant sur Debian *testing/sid* comme base de build.
 
 ## Objectifs
 - Reprendre les durcissements noyau et espace utilisateur de GrapheneOS tout en conservant la compatibilité des paquets Debian/Kali.
