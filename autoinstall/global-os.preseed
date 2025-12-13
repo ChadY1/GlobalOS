@@ -1,0 +1,60 @@
+# Global-K-OS automated install (Debian installer preseed)
+# WARNING: This recipe wipes the target disk. Update disk ID, username, and password before use.
+
+# Locale and keyboard
+d-i debian-installer/language string en
+d-i debian-installer/country string US
+d-i debian-installer/locale string en_US.UTF-8
+d-i console-setup/ask_detect boolean false
+d-i keyboard-configuration/xkb-keymap select us
+
+# Networking
+# Prefer DHCP and set a placeholder hostname; override at boot with netcfg/get_hostname if needed.
+d-i netcfg/choose_interface select auto
+d-i netcfg/get_hostname string global-os
+d-i netcfg/get_domain string local
+d-i netcfg/disable_dhcp boolean false
+
+# Clock
+d-i clock-setup/utc boolean true
+d-i time/zone string UTC
+d-i clock-setup/ntp boolean true
+
+# Mirrors
+d-i mirror/country string manual
+d-i mirror/http/hostname string deb.debian.org
+d-i mirror/http/directory string /debian
+d-i mirror/http/proxy string
+
+# Users
+d-i passwd/root-login boolean false
+d-i passwd/make-user boolean true
+d-i passwd/user-fullname string GlobalOS User
+d-i passwd/username string global
+d-i passwd/user-password password changeme
+d-i passwd/user-password-again password changeme
+d-i user-setup/allow-password-weak boolean true
+
+# Packages
+d-i pkgsel/include string sudo openssh-server
+d-i pkgsel/upgrade select safe-upgrade
+popularity-contest popularity-contest/participate boolean false
+
+# Partitioning (full-disk, single ext4 root)
+# Set the disk device to match your environment before building or pass at boot time:
+#   partman-auto/disk=/dev/sda or /dev/vda
+d-i partman-auto/disk string /dev/sda
+d-i partman-auto/method string regular
+d-i partman-auto/choose_recipe select atomic
+d-i partman/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+
+# Bootloader
+grub-installer/only_debian boolean true
+grub-installer/with_other_os boolean false
+d-i grub-installer/bootdev string default
+
+# Finishing
+d-i finish-install/reboot_in_progress note

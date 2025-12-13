@@ -92,7 +92,7 @@ This guide describes how to provision the dedicated server at `195.154.119.178` 
 - Enable user namespaces (as noted in `scripts/build.sh`).
 - Set `DEBIAN_MIRROR=http://mirror.global-os.net` to build without third-party dependencies.
 - Verify `config/apt/99disable-contents.conf` is present in both host and chroot (the build script copies it automatically).
-- Run: `./scripts/build.sh`. On success, the ISO and its SHA-256 hash appear in the repo root.
+- Run: `./scripts/build.sh` (or `--preflight-only` to validate the host). On success, the ISO appears in the repo root; add a SHA-256 file only if you generate it manually.
 
 ## 7. Final verification
 - Boot the ISO in VirtualBox/VMware/QEMU to confirm installer and live session.

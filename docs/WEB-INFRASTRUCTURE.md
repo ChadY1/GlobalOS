@@ -5,7 +5,7 @@ Ce document décrit l'architecture technique pour `global-os.net` et ses sous-do
 ## Découpage DNS et sous-domaines
 - `global-os.net` : page d'accueil, téléchargement public de l'ISO stable et alpha, redirection vers la documentation.
 - `api.global-os.net` : API comptes et portail d'administration (REST JSON).
-- `build.global-os.net` : dépôt des artefacts CI (ISO + hash SHA-256), synchronisés après chaque build réussi.
+- `build.global-os.net` : dépôt des artefacts CI (ISO, hash optionnel si généré manuellement), synchronisés après chaque build réussi.
 - `docs.global-os.net` : documentation statique (guides d'installation, VirtualBox, API, changelog).
 - `mirror.global-os.net` : miroir téléchargeable (rsync/https) des paquets additionnels internes et des profils de sandbox.
 
@@ -18,18 +18,18 @@ Internet
 [nginx reverse proxy] -- route /api -> account_service
    |-- / -> site statique (site/)
    |-- /docs -> docs buildés (mkdocs/hugo ou simple rsync)
-   |-- /artifacts -> ISO + .sha256 produits par scripts/build.sh
+   |-- /artifacts -> ISO produits par scripts/build.sh (hash optionnel si fourni)
 ```
 
 ### Rôles et ports
 - **nginx** : 443 (TLS), sert le site statique et reverse-proxy vers l'API (localhost:8080).
 - **Account service** : `web/account_service.py` écoute sur 8080, REST JSON, stockage SQLite local.
-- **Artifacts** : exposés en lecture seule (`/var/www/global-os/artifacts`). Chaque ISO est accompagnée de son hash `.sha256`.
+- **Artifacts** : exposés en lecture seule (`/var/www/global-os/artifacts`). Chaque ISO peut être accompagnée d'un hash `.sha256` si vous le générez et le publiez.
 
 ## Pipeline de publication ISO
-1. `./scripts/build.sh` produit l'ISO et `<iso>.sha256`.
+1. `./scripts/build.sh` produit l'ISO.
 2. `./scripts/publish_to_website.sh` envoie via `rsync` :
-   - `Global-K-OS*.iso` et `*.sha256` vers `build.global-os.net:/var/www/global-os/artifacts/`.
+   - `Global-K-OS*.iso` (et un éventuel `*.sha256` si vous l'avez généré) vers `build.global-os.net:/var/www/global-os/artifacts/`.
    - le site statique `site/` et la doc `docs/` vers `global-os.net:/var/www/global-os/`.
 3. Le reverse-proxy rafraîchit automatiquement les index (`nginx` sert directement le contenu mis à jour).
 
