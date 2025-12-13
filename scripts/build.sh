@@ -76,45 +76,13 @@ require_cmd() {
   fi
 }
 
-if [ "${SKIP_DEPS_CHECK}" = true ]; then
-  echo "[!] Skipping dependency checks (requested)."
-elif [ "${PREFLIGHT_ONLY}" = true ] && [ "${SKIP_DEPS_CHECK}" != true ]; then
-  echo "[+] Checking dependencies..."
-  require_cmd lb live-build
-  require_cmd bwrap bubblewrap
-  require_cmd xdg-dbus-proxy xdg-dbus-proxy
-  require_cmd newuidmap uidmap
-  require_cmd debootstrap debootstrap
-  require_cmd unshare util-linux
-else
-  require_cmd lb live-build
-  # bubblewrap installs the `bwrap` binary
-  require_cmd bwrap bubblewrap
-  require_cmd xdg-dbus-proxy xdg-dbus-proxy
-  require_cmd newuidmap uidmap
-  require_cmd debootstrap debootstrap
-  require_cmd unshare util-linux
-fi
-
-if [ "${SKIP_DEPS_CHECK}" = true ] && [ "${PREFLIGHT_ONLY}" != true ]; then
-  echo "[!] Dependency checks were skipped; the build may fail if tooling is missing." >&2
-fi
-
-# Validate that the host permits the bubblewrap mounts we need before doing
-# anything expensive. Some CI/containers block devpts/proc mounts even when
-# unprivileged user namespaces are enabled, which would otherwise fail halfway
-# through the live-build process.
-tmp_err="$(mktemp)"
-if ! bwrap --dev-bind / / --proc /proc --dev /dev true >"${tmp_err}" 2>&1; then
-  echo "[!] bubblewrap cannot create required mounts in this environment." >&2
-  echo "    The host/container likely blocks user-namespace mounts (e.g., proc/devpts)." >&2
-  echo "    Rerun inside a VM, on bare metal, or with a privileged container (docker run --privileged)." >&2
-  echo "    bubblewrap output:" >&2
-  cat "${tmp_err}" >&2 || true
-  rm -f "${tmp_err}"
-  exit 1
-fi
-rm -f "${tmp_err}"
+require_cmd lb live-build
+# bubblewrap installs the `bwrap` binary
+require_cmd bwrap bubblewrap
+require_cmd xdg-dbus-proxy xdg-dbus-proxy
+require_cmd newuidmap uidmap
+require_cmd debootstrap debootstrap
+require_cmd unshare util-linux
 
 USERNS_SYSCTL="/proc/sys/kernel/unprivileged_userns_clone"
 USERNS_MAX="/proc/sys/user/max_user_namespaces"
@@ -161,10 +129,49 @@ check_unpriv_mounts() {
   rm -rf "${sandbox}"
 }
 
-if [ "${SKIP_UNPRIV_CHECK}" != true ]; then
-  check_unpriv_mounts
-else
-  echo "[!] Skipping unprivileged mount self-test (requested)."
+check_unpriv_mounts
+
+# Clean previous artifacts while keeping the tracked config tree intact
+lb clean --purge
+
+  if ! unshare -Ur sh -c 'set -e; mount -t proc proc "$1/proc"; mount -t devpts devpts "$1/dev/pts"' -- "${sandbox}" 2>/dev/null; then
+    echo "[!] Unable to mount proc/devpts inside an unprivileged user namespace." >&2
+    echo "    The host/container likely blocks user namespace mounts." >&2
+    echo "    Rerun inside a VM, on bare metal, or with a privileged container (docker run --privileged)." >&2
+    rm -rf "${sandbox}"
+    exit 1
+  fi
+
+# Base configuration
+DEBIAN_MIRROR="http://deb.debian.org/debian"
+ISO_VERSION="4.0"
+
+lb config \
+  --mode debian \
+  --distribution trixie \
+  --archive-areas "main contrib non-free non-free-firmware" \
+  --debian-installer live \
+  --bootloader grub \
+  --debian-installer-gui true \
+  --linux-packages none \
+  --iso-application "Global-K-OS" \
+  --iso-publisher "GlobalOS" \
+  --iso-volume "Global-K-OS-${ISO_VERSION}" \
+  --mirror-bootstrap "${DEBIAN_MIRROR}" \
+  --mirror-chroot "${DEBIAN_MIRROR}" \
+  --mirror-binary "${DEBIAN_MIRROR}" \
+  --security false
+# NOTE: We rely on the default keyring handling inside live-build/apt.
+# Passing --keyring here currently triggers "Unsupported file ..." with newer
+# apt toolchains, so we keep the default trusted key configuration.
+
+# Package selection: core desktop/tooling (recreate clean tree every run)
+mkdir -p config/package-lists
+# Avoid copying the same file onto itself (CI reported identical source/dest paths)
+CORE_SRC="${REPO_ROOT}/config/package-lists/core.list.chroot"
+CORE_DST="config/package-lists/core.list.chroot"
+if [ "$(readlink -f "${CORE_SRC}")" != "$(readlink -f "${CORE_DST}")" ]; then
+  cp -f "${CORE_SRC}" "${CORE_DST}"
 fi
 
 if [ "${PREFLIGHT_ONLY}" = true ]; then
